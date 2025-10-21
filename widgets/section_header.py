@@ -1,0 +1,10 @@
+from PySide6.QtWidgets import QLabel
+from PySide6.QtGui import QFont
+
+class SectionHeader(QLabel):
+    def __init__(self, text: str):
+        super().__init__(text)
+        f = QFont()
+        f.setPointSize(11)
+        f.setBold(True)
+        self.setFont(f)

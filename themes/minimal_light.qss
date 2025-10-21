@@ -1,0 +1,31 @@
+QWidget { 
+    background-color: #f5f5f5; 
+    color: #202020; 
+    font-family: 'Segoe UI', 'Roboto', sans-serif; 
+}
+
+QPushButton { 
+    background: #ffffff; 
+    border: 1px solid #ccc; 
+    padding: 6px 10px; 
+    border-radius: 6px; 
+}
+
+QPushButton:hover { 
+    background: #e6e6e6; 
+}
+
+QLabel, QGroupBox, QHeaderView::section {
+    color: #202020;
+    font-weight: bold;
+    background-color: #e0e0e0;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+QCheckBox::indicator {
+    width: 40px;
+    height: 20px;
+    background-color: #555;
+    border-radius: 10px;
+}

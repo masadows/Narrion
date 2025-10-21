@@ -1,0 +1,89 @@
+QWidget { 
+    background-color: #f0f0f5;  /* jasny, lekko szary/liliowy */
+    color: #333333;              /* ciemnoszary tekst, nie czarny */
+    font-family: 'Segoe UI', 'Roboto', sans-serif; 
+}
+
+QPushButton { 
+    background: #d0d0e0;        /* pastelowy fiolet/szary */
+    border: 1px solid #a0a0b0; 
+    padding: 6px 10px; 
+    border-radius: 6px; 
+    color: #222222;
+}
+
+QPushButton:hover { 
+    background: #c0c0d0;        /* delikatnie ciemniejszy przy hover */
+}
+
+QPushButton:pressed { 
+    background: #b0b0c0;        /* jeszcze ciemniejszy przy wciśnięciu */
+}
+
+QLabel, QGroupBox, QHeaderView::section {
+    color: #5a5a8f;              /* stonowany niebieski/fioletowy */
+    font-weight: bold;
+    background-color: #e0e0f0;   /* pastelowy, jasny */
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+QCalendarWidget { 
+    background-color: #f0f0f5;
+    border: 1px solid #a0a0b0;
+    border-radius: 6px;
+}
+
+QCalendarWidget QToolButton {
+    background-color: #d0d0e0;
+    border: 1px solid #a0a0b0;
+    border-radius: 4px;
+    height: 25px;
+}
+
+QCalendarWidget QToolButton:hover {
+    background-color: #c0c0d0;
+}
+
+QCalendarWidget QToolButton:pressed {
+    background-color: #b0b0c0;
+}
+
+QCalendarWidget QMenu {
+    background-color: #e0e0f0;
+    border: 1px solid #a0a0b0;
+}
+
+QCalendarWidget QWidget {
+    alternate-background-color: #f8f8ff;  /* dni tygodnia i tła */
+}
+
+QCalendarWidget QSpinBox { 
+    background-color: #d0d0e0;
+    border: 1px solid #a0a0b0;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+QCalendarWidget QSpinBox::up-button, 
+QCalendarWidget QSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 16px;
+    height: 12px;
+    border-left: 1px solid #a0a0b0;
+}
+
+QCalendarWidget QAbstractItemView {
+    background-color: #f8f8ff;   /* dni miesiąca */
+    selection-background-color: #b0b0c0;
+    selection-color: #222222;
+    gridline-color: #c0c0d0;
+}
+
+QCheckBox::indicator {
+    width: 40px;
+    height: 20px;
+    background-color: #d0d0e0;
+    border-radius: 10px;
+}

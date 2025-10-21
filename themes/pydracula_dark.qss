@@ -1,0 +1,107 @@
+QWidget { 
+    background-color: #0f111a; 
+    color: #f8f8f2; 
+    font-family: 'Segoe UI', 'Roboto', sans-serif; 
+}
+QPushButton { 
+    background: #44475a; 
+    border: 1px solid #6272a4; 
+    padding: 6px 10px; 
+    border-radius: 6px; 
+}
+QPushButton:hover { 
+    background: #5a5f7a; 
+}
+QPushButton:pressed { 
+    background: #3b3f55; 
+}
+
+QLabel, QGroupBox, QHeaderView::section {
+    color: #8be9fd;
+    font-weight: bold;
+    background-color: #1e1f2a;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+QCalendarWidget { 
+    background-color: #0f111a;
+    border: 1px solid #6272a4;
+    border-radius: 6px;
+}
+
+QCalendarWidget QToolButton {
+    background-color: #44475a;
+    border: 1px solid #6272a4;
+    border-radius: 4px;
+    height: 25px;
+    color: #f8f8f2;
+}
+
+QCalendarWidget QToolButton:hover {
+    background-color: #5a5f7a;
+}
+
+QCalendarWidget QToolButton:pressed {
+    background-color: #3b3f55;
+}
+
+QCalendarWidget QMenu {
+    background-color: #1e1f2a;
+    border: 1px solid #6272a4;
+    color: #f8f8f2;
+}
+
+QCalendarWidget QWidget {
+    alternate-background-color: #1a1b25;  /* dni tygodnia i tła */
+}
+
+QCalendarWidget QSpinBox { 
+    background-color: #44475a;
+    border: 1px solid #6272a4;
+    border-radius: 4px;
+    padding: 2px 4px;
+    color: #f8f8f2;
+}
+
+QCalendarWidget QSpinBox::up-button, 
+QCalendarWidget QSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 16px;
+    height: 12px;
+    border-left: 1px solid #6272a4;
+}
+
+QCalendarWidget QAbstractItemView {
+    background-color: #0f111a;   /* dni miesiąca */
+    selection-background-color: #6272a4;
+    selection-color: #f8f8f2;
+    gridline-color: #44475a;
+    color: #f8f8f2;
+}
+
+QCalendarWidget QAbstractItemView:enabled:selected {
+    background-color: #6272a4;
+    color: #f8f8f2;
+}
+
+QCalendarWidget QAbstractItemView:enabled:hover {
+    background-color: #5a5f7a;
+}
+
+QCheckBox::indicator {
+    width: 40px;
+    height: 20px;
+    background-color: #555;
+    border-radius: 10px;
+}
+
+QListWidget::item {
+    border-radius: 12px;
+    padding: 20px;
+    margin: 8px;
+    min-width: 160px;
+    min-height: 80px;
+    text-align: center;
+}
