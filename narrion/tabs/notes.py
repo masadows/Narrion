@@ -1,5 +1,16 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLineEdit, QTreeWidget, QTreeWidgetItem, QPushButton, QTextEdit
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLineEdit,
+    QPushButton,
+    QTextEdit,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+
 from widgets.section_header import SectionHeader
+
 
 def build() -> QWidget:
     w = QWidget()
@@ -7,30 +18,30 @@ def build() -> QWidget:
     h.setContentsMargins(4, 4, 4, 4)
 
     left = QVBoxLayout()
-    left.addWidget(SectionHeader('Notatki'))
+    left.addWidget(SectionHeader("Notatki"))
     search = QLineEdit()
-    search.setPlaceholderText('Szukaj notatek...')
+    search.setPlaceholderText("Szukaj notatek...")
     left.addWidget(search)
 
     tree = QTreeWidget()
     tree.setHeaderHidden(True)
-    for folder in ('Lore', 'Lokacje', 'Zadania', 'NPC'):
+    for folder in ("Lore", "Lokacje", "Zadania", "NPC"):
         f = QTreeWidgetItem([folder])
         for i in range(3):
-            child = QTreeWidgetItem([f'{folder} — Notatka {i+1}'])
+            child = QTreeWidgetItem([f"{folder} — Notatka {i + 1}"])
             f.addChild(child)
         tree.addTopLevelItem(f)
     left.addWidget(tree)
 
     btns = QHBoxLayout()
-    btns.addWidget(QPushButton('Nowa notatka'))
-    btns.addWidget(QPushButton('Nowy folder'))
+    btns.addWidget(QPushButton("Nowa notatka"))
+    btns.addWidget(QPushButton("Nowy folder"))
     left.addLayout(btns)
 
     right = QVBoxLayout()
-    right.addWidget(SectionHeader('Edytor notatki'))
+    right.addWidget(SectionHeader("Edytor notatki"))
     editor = QTextEdit()
-    editor.setPlaceholderText('Wybierz notatkę z lewej, aby zobaczyć zawartość...')
+    editor.setPlaceholderText("Wybierz notatkę z lewej, aby zobaczyć zawartość...")
     right.addWidget(editor)
 
     h.addLayout(left, 1)

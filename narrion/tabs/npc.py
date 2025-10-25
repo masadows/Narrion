@@ -1,5 +1,17 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QPushButton, QFormLayout, QLineEdit, QComboBox, QTextEdit
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QHBoxLayout,
+    QLineEdit,
+    QListWidget,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 from widgets.section_header import SectionHeader
+
 
 def build() -> QWidget:
     w = QWidget()
@@ -7,19 +19,19 @@ def build() -> QWidget:
     h.setContentsMargins(6, 6, 6, 6)
 
     left = QVBoxLayout()
-    left.addWidget(SectionHeader('Baza NPC'))
+    left.addWidget(SectionHeader("Baza NPC"))
     npc_list = QListWidget()
-    npc_list.addItems(['Kupiec Tom', 'Strażnik Miejski', 'Mistrz Kowalstwa'])
+    npc_list.addItems(["Kupiec Tom", "Strażnik Miejski", "Mistrz Kowalstwa"])
     left.addWidget(npc_list)
-    left.addWidget(QPushButton('Nowy NPC'))
-    left.addWidget(QPushButton('Importuj postać'))
+    left.addWidget(QPushButton("Nowy NPC"))
+    left.addWidget(QPushButton("Importuj postać"))
 
     right = QVBoxLayout()
-    right.addWidget(SectionHeader('Szczegóły NPC'))
+    right.addWidget(SectionHeader("Szczegóły NPC"))
     form = QFormLayout()
-    form.addRow('Imię:', QLineEdit())
-    form.addRow('Rola:', QComboBox())
-    form.addRow('Opis:', QTextEdit())
+    form.addRow("Imię:", QLineEdit())
+    form.addRow("Rola:", QComboBox())
+    form.addRow("Opis:", QTextEdit())
     right.addLayout(form)
     right.addStretch()
 

@@ -4,3 +4,4 @@ python-dotenv
 ruff
 pyside6
 -e .
+numpy
