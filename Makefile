@@ -55,6 +55,10 @@ create_environment:
 	@echo ">>> Unix/macOS: source ./.venv/bin/activate"
 	
 
+## Run program
+.PHONY: run
+run:
+	uv run  narrion/main.py
 
 
 #################################################################################

@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QLabel
+
 
 class SectionHeader(QLabel):
     def __init__(self, text: str):

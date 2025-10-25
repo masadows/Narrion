@@ -1,5 +1,15 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QTextEdit, QPushButton, QCalendarWidget, QSplitter
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QCalendarWidget,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSplitter,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 def build() -> QWidget:
     w = QWidget()
@@ -9,17 +19,17 @@ def build() -> QWidget:
     title = QLabel("Terminarz sesji")
     title.setAlignment(Qt.AlignCenter)
     title.setMaximumHeight(40)
-    
+
     v.addWidget(title)
     cal = QCalendarWidget()
     cal.setGridVisible(True)
     cal.setMinimumHeight(280)
 
     right = QVBoxLayout()
-    right.addWidget(QLabel('Szczegóły wydarzeń'))
+    right.addWidget(QLabel("Szczegóły wydarzeń"))
     right.addWidget(QLineEdit())
     right.addWidget(QTextEdit())
-    right.addWidget(QPushButton('Synchronizuj z Google Calendar'))
+    right.addWidget(QPushButton("Synchronizuj z Google Calendar"))
 
     split = QSplitter(Qt.Horizontal)
     left_frame = QWidget()
