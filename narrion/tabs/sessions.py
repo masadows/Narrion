@@ -73,7 +73,7 @@ class SessionsTab(QWidget):
         label.setAlignment(Qt.AlignCenter)
 
         tabs = QTabWidget()
-        tabs.addTab(build_notes(), "Notatki")
+        tabs.addTab(build_notes(self.current_session), "Notatki")
         tabs.addTab(build_characters(), "Karty postaci")
         tabs.addTab(build_npc(), "Baza NPC")
 
