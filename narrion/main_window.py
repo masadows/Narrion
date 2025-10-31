@@ -1,19 +1,21 @@
-import os
-
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDockWidget,
+    QHBoxLayout,
     QLabel,
     QMainWindow,
+    QPushButton,
+    QSizePolicy,
+    QStackedWidget,
     QStatusBar,
-    QTabWidget,
     QToolBar,
     QVBoxLayout,
     QWidget,
 )
+import qtawesome as qta
 
 from tabs.battlemaps import build as build_battlemaps
 from tabs.calendar import build as build_calendar
@@ -29,16 +31,50 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("RPG Master Assistant")
         self.setWindowIcon(QIcon.fromTheme("applications-games"))
 
-        central = QWidget()
-        layout = QVBoxLayout(central)
-        self.setCentralWidget(central)
+        self.central = QWidget()
+        main_layout = QHBoxLayout(self.central)
+        self.setCentralWidget(self.central)
 
-        self.tabs = QTabWidget()
-        self.tabs.addTab(build_sessions(), "Sesje RPG")
-        self.tabs.addTab(build_battlemaps(), "Battlemapy")
-        self.tabs.addTab(build_calendar(), "Terminarz sesji")
+        self.side_panel = QWidget()
+        side_layout = QVBoxLayout(self.side_panel)
+        side_layout.setContentsMargins(0, 0, 0, 0)
+        side_layout.setSpacing(0)
 
-        layout.addWidget(self.tabs)
+        self.buttons_info = [
+            ("Sesje RPG", "fa5s.book-open", 0),
+            ("Battlemapy", "fa5s.map", 1),
+            ("Terminarz", "fa5s.calendar-alt", 2),
+            ("Kości", "fa5s.dice-d20", "dice"),
+            ("Tracker", "fa5s.list-ol", "tracker"),
+        ]
+
+        self.page_buttons = []
+        for text, icon, idx in self.buttons_info:
+            btn = QPushButton(qta.icon(icon), text)
+            btn.icon_name = icon
+            btn.setIconSize(QSize(24, 24))
+            btn.setCheckable(True)
+            btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            btn.setObjectName("menuButtons")
+            btn.clicked.connect(lambda checked, i=idx: self.switch_page(i))
+            side_layout.addWidget(btn)
+            self.page_buttons.append(btn)
+
+        side_layout.addStretch()
+
+        self.side_panel.setFixedWidth(160)
+        main_layout.addWidget(self.side_panel)
+
+        self.stack = QStackedWidget()
+        self.pages = [
+            build_sessions(),
+            build_battlemaps(),
+            build_calendar(),
+        ]
+        for page in self.pages:
+            self.stack.addWidget(page)
+
+        main_layout.addWidget(self.stack)
 
         self.status = QStatusBar()
         self.setStatusBar(self.status)
@@ -57,18 +93,11 @@ class MainWindow(QMainWindow):
         self.initiative_dock = None
         self.dice_dock = None
 
+        self.switch_page(0)
+
     def _create_toolbar(self) -> QToolBar:
         tb = QToolBar("Główne")
         tb.setIconSize(QSize(20, 20))
-
-        act_initiative = QAction(QIcon.fromTheme("view-list-symbolic"), "Tracker inicjatywy", self)
-        act_initiative.triggered.connect(self.open_initiative_dock)
-        tb.addAction(act_initiative)
-
-        icons_path = os.path.join(os.path.dirname(__file__), "icones")
-        act_dice = QAction(QIcon(os.path.join(icons_path, "dice.png")), "Rzut kośćmi", self)
-        act_dice.triggered.connect(self.open_dice_dock)
-        tb.addAction(act_dice)
 
         tb.addWidget(QLabel("Motyw:"))
         self.theme_select = QComboBox()
@@ -82,19 +111,23 @@ class MainWindow(QMainWindow):
 
         self.theme_toggle = QCheckBox("", self)
         self.theme_toggle.stateChanged.connect(self.toggle_light_dark)
-
         tb.addWidget(self.theme_toggle)
 
         return tb
 
     def apply_theme(self, theme_name: str):
-        path = THEMES.get(theme_name)
-        if path:
+        theme_info = THEMES.get(theme_name)
+        if theme_info:
             try:
+                path = theme_info["path"]
+                icon_color = theme_info["icon_color"]
                 with open(path, "r", encoding="utf-8") as f:
                     style = f.read()
                 self.setStyleSheet(style)
                 self.current_theme = theme_name
+
+                for btn in self.page_buttons:
+                    btn.setIcon(qta.icon(btn.icon_name, color=icon_color))
             except FileNotFoundError:
                 print(f"Nie znaleziono pliku motywu: {path}")
         else:
@@ -117,6 +150,34 @@ class MainWindow(QMainWindow):
         if new_name in THEMES:
             self.theme_select.setCurrentText(new_name)
 
+    def switch_page(self, index):
+        for btn in self.page_buttons:
+            btn.setChecked(False)
+
+        if index == "dice":
+            self.open_dice_dock()
+            self.page_buttons[3].setChecked(True)
+            return
+        elif index == "tracker":
+            self.open_initiative_dock()
+            self.page_buttons[4].setChecked(True)
+            return
+
+        if isinstance(index, int):
+            self.stack.setCurrentIndex(index)
+            self.page_buttons[index].setChecked(True)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self.central.width() < 900:
+            for btn in self.page_buttons:
+                btn.setText("")
+            self.side_panel.setFixedWidth(50)
+        else:
+            for (text, _, _), btn in zip(self.buttons_info, self.page_buttons):
+                btn.setText(text)
+            self.side_panel.setFixedWidth(160)
+
     def open_initiative_dock(self):
         if self.initiative_dock is None:
             self.initiative_dock = QDockWidget("Tracker inicjatywy", self)
@@ -126,10 +187,9 @@ class MainWindow(QMainWindow):
                 | QDockWidget.DockWidgetMovable
                 | QDockWidget.DockWidgetFloatable
             )
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.initiative_dock)
+            self.addDockWidget(Qt.RightDockWidgetArea, self.initiative_dock)
             self.initiative_dock.destroyed.connect(lambda: setattr(self, "initiative_dock", None))
         self.initiative_dock.show()
-        self.initiative_dock.raise_()
 
     def open_dice_dock(self):
         if self.dice_dock is None:
@@ -141,7 +201,6 @@ class MainWindow(QMainWindow):
                 | QDockWidget.DockWidgetFloatable
             )
             self.addDockWidget(Qt.RightDockWidgetArea, self.dice_dock)
-            self.dice_dock.setFixedSize(self.dice_dock.sizeHint())
+            self.dice_dock.setFixedWidth(self.dice_dock.sizeHint().width())
             self.dice_dock.destroyed.connect(lambda: setattr(self, "dice_dock", None))
         self.dice_dock.show()
-        self.dice_dock.raise_()

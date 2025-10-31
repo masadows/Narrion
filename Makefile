@@ -60,6 +60,10 @@ create_environment:
 run:
 	uv run  narrion/main.py
 
+## Icone browser
+.PHONY: browser
+browser:
+	uv run qta-browser
 
 #################################################################################
 # PROJECT RULES                                                                 #

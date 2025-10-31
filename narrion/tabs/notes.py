@@ -1,18 +1,20 @@
 from pathlib import Path
+
 from PySide6.QtCore import QTimer
-from PySide6.QtGui import QTextCursor, QMouseEvent
+from PySide6.QtGui import QMouseEvent, QTextCursor
 from PySide6.QtWidgets import (
     QHBoxLayout,
+    QInputDialog,
     QLineEdit,
+    QMessageBox,
     QPushButton,
     QTextEdit,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
-    QInputDialog,
-    QMessageBox,
 )
+
 from widgets.section_header import SectionHeader
 
 
@@ -185,8 +187,12 @@ def delete_item(tree: QTreeWidget, editor: QTextEdit):
     if not path.exists():
         return
 
-    reply = QMessageBox.question(tree, "Usuń", f"Czy na pewno chcesz usunąć '{path.name}'?",
-                                 QMessageBox.Yes | QMessageBox.No)
+    reply = QMessageBox.question(
+        tree,
+        "Usuń",
+        f"Czy na pewno chcesz usunąć '{path.name}'?",
+        QMessageBox.Yes | QMessageBox.No,
+    )
     if reply == QMessageBox.Yes:
         try:
             if path.is_file():
@@ -196,6 +202,7 @@ def delete_item(tree: QTreeWidget, editor: QTextEdit):
                     editor.current_file = None
             else:
                 import shutil
+
                 shutil.rmtree(path)
             refresh_tree(tree)
         except Exception as e:
