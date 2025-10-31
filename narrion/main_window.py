@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
                 | QDockWidget.DockWidgetFloatable
             )
             self.addDockWidget(Qt.RightDockWidgetArea, self.dice_dock)
-            self.dice_dock.setFixedSize(self.dice_dock.sizeHint())
+            self.dice_dock.setFixedWidth(self.dice_dock.sizeHint().width())
             self.dice_dock.destroyed.connect(lambda: setattr(self, "dice_dock", None))
         self.dice_dock.show()
         self.dice_dock.raise_()

@@ -29,3 +29,83 @@ QCheckBox::indicator {
     background-color: #555;
     border-radius: 10px;
 }
+
+
+/* Dice Roller */
+QGroupBox {
+    border: 2px solid #333;
+    background-color: #25282d;
+}
+
+QGroupBox::title {
+    font-weight: bold;
+    color: #ccc;
+}
+
+/* Log */
+#logBox {
+    background-color: #111;
+    border: 1px solid #333;
+    color: #00ff99;
+    font-family: Consolas, monospace;
+}
+
+/* Przyciski kości */
+QPushButton[diceButton="true"] {
+    background-color: #333;
+    border: 2px solid #555;
+    font-weight: bold;
+}
+QPushButton[diceButton="true"]:hover {
+    background-color: #444;
+    border-color: #ffaa00;
+}
+QPushButton[diceButton="true"]:pressed {
+    background-color: #ffaa00;
+    color: #000;
+}
+
+QPushButton[customButton="true"] {
+    background-color: #ff8800;
+    color: #000;
+    font-weight: bold;
+}
+
+QPushButton[customButton="true"]:hover {
+    background-color: #ffaa33;
+}
+
+QPushButton[smallButton="true"] {
+    background-color: #444;
+    border: 1px solid #666;
+    font-weight: bold;
+}
+QPushButton[smallButton="true"]:hover {
+    background-color: #555;
+}
+
+QPushButton[resetButton="true"] {
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+}
+QPushButton[resetButton="true"]:hover {
+    background-color: #34ce57;
+}
+
+#rollButton {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#rollButton:hover {
+    background-color: #339cff;
+}
+
+#countLabel {
+    font-size: 18px;
+    color: #ffcc00;
+    font-weight: bold;
+}

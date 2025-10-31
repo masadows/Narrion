@@ -28,7 +28,7 @@ def build() -> QWidget:
         with open(qss_path, "r", encoding="utf-8") as f:
             w.setStyleSheet(f.read())
 
-    v.addWidget(SectionHeader("Rzut kośćmi"))
+    # v.addWidget(SectionHeader("Rzut kośćmi"))
 
     log = QPlainTextEdit()
     log.setObjectName("logBox")
@@ -124,7 +124,7 @@ def roll(selected_dices, modifier, log):
     roll = "+".join([f"{v}d{k}" for k, v in selected_dices.items() if v > 0])
     if modifier != 0:
         roll += f"{modifier:+d}"
-    log.appendPlainText(f"Rzut {roll}: {str(rolls)} => {total}\n")
+    log.appendPlainText(f"Rzut {roll}: {str(rolls)} => {total}")
 
 
 def flatten(list_of_lists):
