@@ -1,4 +1,5 @@
-/* --- Główne tło i tekst --- */
+/* icon-color: #f8f8f2; */
+
 QWidget {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #141722, stop:1 #0c0d14);
@@ -6,7 +7,6 @@ QWidget {
     font-family: 'Segoe UI', 'Roboto', sans-serif;
 }
 
-/* --- Przycisk ogólny --- */
 QPushButton {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #4a4e68, stop:1 #393f57);
@@ -24,7 +24,6 @@ QPushButton:pressed {
                                 stop:0 #32364a, stop:1 #272c3d);
 }
 
-/* --- Etykiety, grupy --- */
 QLabel, QGroupBox, QHeaderView::section {
     color: #8be9fd;
     font-weight: bold;
@@ -34,7 +33,6 @@ QLabel, QGroupBox, QHeaderView::section {
     border-radius: 4px;
 }
 
-/* --- Kalendarz --- */
 QCalendarWidget {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #141722, stop:1 #0c0d14);
@@ -98,7 +96,6 @@ QCalendarWidget QAbstractItemView:enabled:hover {
     background: #5a5f7a;
 }
 
-/* --- CheckBox --- */
 QCheckBox::indicator {
     width: 40px;
     height: 20px;
@@ -107,7 +104,6 @@ QCheckBox::indicator {
     border-radius: 10px;
 }
 
-/* --- Lista --- */
 QListWidget::item {
     border-radius: 12px;
     padding: 20px;
@@ -135,7 +131,6 @@ QListWidget:focus {
     outline: none;
 }
 
-/* --- GroupBox --- */
 QGroupBox {
     border: 2px solid #6272a4;
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
@@ -146,7 +141,6 @@ QGroupBox::title {
     color: #8be9fd;
 }
 
-/* --- Log Box --- */
 #logBox {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #141722, stop:1 #0c0d14);
@@ -155,7 +149,6 @@ QGroupBox::title {
     font-family: Consolas, monospace;
 }
 
-/* --- Przycisk kości --- */
 QPushButton[diceButton="true"] {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #2d3042, stop:1 #232745);
@@ -173,7 +166,6 @@ QPushButton[diceButton="true"]:pressed {
     color: #0f111a;
 }
 
-/* --- Przycisk do własnych rzutów --- */
 QPushButton[customButton="true"] {
     background: #6272a4;
     color: #f8f8f2;
@@ -184,7 +176,6 @@ QPushButton[customButton="true"]:hover {
     color: #0f111a;
 }
 
-/* --- Mniejsze przyciski --- */
 QPushButton[smallButton="true"] {
     background: #2b2e3b;
     border: 1px solid #44475a;
@@ -195,7 +186,6 @@ QPushButton[smallButton="true"]:hover {
     background: #3b3f55;
 }
 
-/* --- Reset --- */
 QPushButton[resetButton="true"] {
     background: #50fa7b;
     color: #0f111a;
@@ -205,7 +195,6 @@ QPushButton[resetButton="true"]:hover {
     background: #69ff9f;
 }
 
-/* --- Główny przycisk „Roll” --- */
 #rollButton {
     background: #6272a4;
     color: #f8f8f2;
@@ -217,14 +206,13 @@ QPushButton[resetButton="true"]:hover {
     color: #0f111a;
 }
 
-/* --- Etykieta wyniku --- */
 #countLabel {
     font-size: 18px;
     color: #8be9fd;
     font-weight: bold;
     border: 1px solid #6272a4;
 }
-/* --- Tło obszaru zakładek --- */
+
 QTabWidget::pane {
     border: 1px solid #6272a4;
     border-radius: 6px;
@@ -233,12 +221,10 @@ QTabWidget::pane {
     margin-top: 2px;
 }
 
-/* --- Pojedyncza zakładka --- */
 QTabBar::tab {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #2a2f4b, stop:1 #1c2035);
     color: #c1d4ff;
-    padding: 8px 15px;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     border: 1px solid #6272a4;
@@ -248,14 +234,12 @@ QTabBar::tab {
     font-weight: bold;
 }
 
-/* --- Zakładka po najechaniu --- */
 QTabBar::tab:hover {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #3a4170, stop:1 #252a4b);
     color: #e0ecff;
 }
 
-/* --- Aktywna zakładka --- */
 QTabBar::tab:selected {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #4b5690, stop:1 #353f6f);
@@ -265,7 +249,26 @@ QTabBar::tab:selected {
     font-weight: bold;
 }
 
-/* --- Zakładki nieaktywne po lewej --- */
 QTabBar::tab:!selected {
     margin-top: 4px;
+}
+
+QPushButton#menuButtons {
+    padding: 12px;
+    text-align: left;
+    border: none;
+    background-color: transparent;
+    color: #cccccc;
+    font-size: 14px;
+}
+
+QPushButton#menuButtons:hover {
+    background-color: #44475a;
+    color: #f8f8f2;
+}
+
+QPushButton#menuButtons:checked {
+    background-color: #6272a4;
+    color: #ffffff;
+    font-weight: bold;
 }

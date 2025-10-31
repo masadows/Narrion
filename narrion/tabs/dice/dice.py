@@ -10,12 +10,10 @@ from PySide6.QtWidgets import (
     QLabel,
     QPlainTextEdit,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
-    QSizePolicy,
 )
-
-from widgets.section_header import SectionHeader
 
 
 def build() -> QWidget:
