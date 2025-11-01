@@ -1,4 +1,6 @@
 # tabs/sessions.py
+from pathlib import Path
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -12,7 +14,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from pathlib import Path
 
 from tabs.characters import build as build_characters
 from tabs.notes import build as build_notes
@@ -36,9 +37,7 @@ class SessionsTab(QWidget):
     def _load_sessions(self):
         """Loads the list of existing sessions from the data/sessions directory"""
         self.SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
-        self.sessions = [
-            p.name for p in self.SESSIONS_DIR.iterdir() if p.is_dir()
-        ]
+        self.sessions = [p.name for p in self.SESSIONS_DIR.iterdir() if p.is_dir()]
 
     def _build_session_list_ui(self):
         """Ekran startowy z listą sesji"""
@@ -120,6 +119,7 @@ class SessionsTab(QWidget):
             self.sessions.remove(name)
             session_path = self.SESSIONS_DIR / name
             import shutil
+
             shutil.rmtree(session_path)
             self._build_session_list_ui()
 
