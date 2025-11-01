@@ -6,3 +6,4 @@ pyside6
 -e .
 numpy
 qtawesome
+fantasynames==0.1.2

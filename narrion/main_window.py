@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QStackedWidget,
-    QStatusBar,
     QToolBar,
     QVBoxLayout,
     QWidget,
@@ -20,6 +19,7 @@ import qtawesome as qta
 from tabs.battlemaps import build as build_battlemaps
 from tabs.calendar import build as build_calendar
 from tabs.dice.dice import build as build_dice
+from tabs.generator.names import build as build_name_generator
 from tabs.initiative import build as build_initiative
 from tabs.sessions import build as build_sessions
 from themes import THEMES
@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
             ("Sesje RPG", "fa5s.book-open", 0),
             ("Battlemapy", "fa5s.map", 1),
             ("Terminarz", "fa5s.calendar-alt", 2),
+            ("Generator", "fa5s.random", 3),
             ("Kości", "fa5s.dice-d20", "dice"),
             ("Tracker", "fa5s.list-ol", "tracker"),
         ]
@@ -70,15 +71,12 @@ class MainWindow(QMainWindow):
             build_sessions(),
             build_battlemaps(),
             build_calendar(),
+            build_name_generator(),
         ]
         for page in self.pages:
             self.stack.addWidget(page)
 
         main_layout.addWidget(self.stack)
-
-        self.status = QStatusBar()
-        self.setStatusBar(self.status)
-        self.status.showMessage("Gotowe — UI mockup")
 
         self.current_theme = "Pydracula Dark"
         self.apply_theme(self.current_theme)
