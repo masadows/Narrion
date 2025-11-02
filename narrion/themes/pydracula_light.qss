@@ -132,6 +132,11 @@ QCheckBox::indicator {
     border-radius: 10px;
 }
 
+QCheckBox::indicator:checked {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                stop:0 #a58cf0, stop:1 #8b6fe0);
+}
+
 #logBox {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #f1efff, stop:1 #e2def7);
