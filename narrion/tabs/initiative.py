@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 
+import qtawesome as qta
+
 from widgets.section_header import SectionHeader
 
 
@@ -306,12 +308,18 @@ class InitiativeTracker(QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if self.table.width() < self.BUTTONS_RESIZE_THRESHOLD:
-            self.add_btn.setText("+")
-            self.remove_btn.setText("−")
-            self.sort_btn.setText("Sortuj")
+            self.add_btn.setText("")
+            self.add_btn.setIcon(qta.icon("ei.plus"))
+            self.remove_btn.setText("")
+            self.remove_btn.setIcon(qta.icon("ei.minus"))
+            self.sort_btn.setText("")
+            self.sort_btn.setIcon(qta.icon("fa5s.sort"))
         else:
+            self.add_btn.setIcon(QIcon())
             self.add_btn.setText("Dodaj uczestnika")
+            self.remove_btn.setIcon(QIcon())
             self.remove_btn.setText("Usuń uczestnika")
+            self.sort_btn.setIcon(QIcon())
             self.sort_btn.setText("Sortuj według inicjatywy")
 
 
