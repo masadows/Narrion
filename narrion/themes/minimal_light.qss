@@ -38,6 +38,11 @@ QCheckBox::indicator {
     border-radius: 10px;
 }
 
+QCheckBox::indicator:checked {
+    background-color: #eee;
+}
+
+
 QGroupBox {
     border: 2px solid #bbb;
     background-color: #f5f5f5;
