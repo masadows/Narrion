@@ -16,7 +16,10 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
+    QSizePolicy,
 )
+
+import qtawesome as qta
 
 from widgets.section_header import SectionHeader
 
@@ -75,7 +78,8 @@ class InitiativeTracker(QWidget):
     """Initiative tracker widget."""
 
     STATUSES = ["Żywy", "Ogłuszony", "Martwy"]
-    INITIATIVE_RANGE = (1, 30)
+    INITIATIVE_RANGE = (0, 1000)
+    BUTTONS_RESIZE_THRESHOLD = 450
 
     def __init__(self):
         super().__init__()
@@ -107,16 +111,19 @@ class InitiativeTracker(QWidget):
         layout.addWidget(self.table)
 
         controls = QHBoxLayout()
-        self.add_btn = QPushButton("Dodaj uczestnika")
+        self.add_btn = QPushButton("+")
+        self.add_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.add_btn.clicked.connect(self.add_character)
         controls.addWidget(self.add_btn)
 
-        self.remove_btn = QPushButton("Usuń uczestnika")
+        self.remove_btn = QPushButton("−")
+        self.remove_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.remove_btn.clicked.connect(self.remove_character)
         controls.addWidget(self.remove_btn)
         controls.addStretch()
 
-        self.sort_btn = QPushButton("Sortuj według inicjatywy")
+        self.sort_btn = QPushButton("Sortuj")
+        self.sort_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.sort_btn.clicked.connect(self.sort_by_initiative)
         controls.addWidget(self.sort_btn)
 
@@ -127,6 +134,7 @@ class InitiativeTracker(QWidget):
         self.next_btn.setIcon(QIcon(image_path))
         self.next_btn.setIconSize(QSize(20, 20))
         self.next_btn.setToolTip("Następna tura")
+        self.next_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.next_btn.clicked.connect(self.next_turn)
         controls.addWidget(self.next_btn)
 
@@ -296,6 +304,23 @@ class InitiativeTracker(QWidget):
 
         for name, initiative, status in characters:
             self.add_character_data(name, initiative, status)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self.table.width() < self.BUTTONS_RESIZE_THRESHOLD:
+            self.add_btn.setText("")
+            self.add_btn.setIcon(qta.icon("ei.plus"))
+            self.remove_btn.setText("")
+            self.remove_btn.setIcon(qta.icon("ei.minus"))
+            self.sort_btn.setText("")
+            self.sort_btn.setIcon(qta.icon("fa5s.sort"))
+        else:
+            self.add_btn.setIcon(QIcon())
+            self.add_btn.setText("Dodaj uczestnika")
+            self.remove_btn.setIcon(QIcon())
+            self.remove_btn.setText("Usuń uczestnika")
+            self.sort_btn.setIcon(QIcon())
+            self.sort_btn.setText("Sortuj według inicjatywy")
 
 
 def build() -> InitiativeTracker:
