@@ -84,7 +84,7 @@ class SessionsTab(QWidget):
 
         tabs = QTabWidget()
         tabs.addTab(build_notes(self.SESSIONS_DIR / self.current_session), "Notatki")
-        tabs.addTab(build_characters(), "Karty postaci")
+        tabs.addTab(build_characters(), "Gracze")
         tabs.addTab(build_npc(), "Baza NPC")
 
         self.layout.addWidget(back_btn)

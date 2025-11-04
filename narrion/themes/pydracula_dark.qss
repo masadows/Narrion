@@ -121,6 +121,13 @@ QListWidget::item {
     border: 1px solid #44475a;
     color: #f8f8f2;
 }
+QListWidget#characterList::item {
+    border-radius: 8px;
+    padding: 6px;
+    margin: 3px;
+    min-width: 60px;
+    min-height: 0px;
+}
 QListWidget::item:hover {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #3b3f55, stop:1 #2d3150);
