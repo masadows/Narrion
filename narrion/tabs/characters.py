@@ -1,24 +1,22 @@
 from PySide6.QtWidgets import (
-    QComboBox,
     QHBoxLayout,
-    QLabel,
+    QInputDialog,
     QListWidget,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
     QWidget,
-    QInputDialog,
-    QMessageBox,
 )
 
 from widgets.section_header import SectionHeader
-from .player import PlayerWidget
+
+from .player import CharacterWidget
 
 
 class CharactersWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(4, 4, 4, 4)
 
         self.left = QVBoxLayout()
         self.left.addWidget(SectionHeader("Gracze"))
@@ -29,7 +27,7 @@ class CharactersWidget(QWidget):
 
         for p in ["Aldren (Gracz)", "Mira (Gracz)", "Szablozębny (NPC)"]:
             self.char_list.addItem(p)
-            self.player_list[p] = PlayerWidget(p)
+            self.player_list[p] = CharacterWidget(p)
 
         self.char_list.itemClicked.connect(self.open_selected_player)
         self.left.addWidget(self.char_list)
@@ -60,7 +58,7 @@ class CharactersWidget(QWidget):
                 QMessageBox.warning(self, "Błąd", f"Gracz o nazwie '{name}' już istnieje!")
                 return
             self.char_list.addItem(name)
-            self.player_list[name] = PlayerWidget(name)
+            self.player_list[name] = CharacterWidget(name)
 
     def open_selected_player(self, item):
         name = item.text()
