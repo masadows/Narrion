@@ -1,9 +1,11 @@
 from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QPixmap
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtPdfWidgets import QPdfView
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
+    QLabel,
     QLineEdit,
     QPushButton,
     QScrollArea,
@@ -59,6 +61,11 @@ class CharacterWidget(QWidget):
         )
         container_layout.addWidget(text_edit)
 
+        self.image_label = QLabel()
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.hide()
+        container_layout.addWidget(self.image_label)
+
         self.pdf_doc = QPdfDocument(self)
 
         self.pdf_view = QPdfView(self)
@@ -80,11 +87,20 @@ class CharacterWidget(QWidget):
 
     def changePlayerFlie(self):
         path_file, _ = QFileDialog.getOpenFileName(
-            self, "Wybierz plik PDF", "", "Pliki PDF (*.pdf);;Wszystkie pliki (*)"
+            self,
+            "Wybierz kartę postaci",
+            "",
+            "PDF i obrazy (*.pdf *.png *.jpg *.jpeg *.bmp *.gif);;Wszystkie pliki (*)",
         )
-        self.pdf_doc.load(path_file)
-        self.pdf_view.setDocument(self.pdf_doc)
-        self.setPdfSize()
+
+        if path_file.lower().split(".")[-1] == "pdf":
+            self.pdf_doc.load(path_file)
+            self.image_label.setPixmap(QPixmap())
+            self.image_label.hide()
+        else:
+            self.pdf_doc = QPdfDocument()
+            self.original_pixmap = QPixmap(path_file)
+            self.updateImageSize()
 
     def setPdfSize(self):
         if self.pdf_doc.status() == QPdfDocument.Status.Ready:
@@ -104,11 +120,25 @@ class CharacterWidget(QWidget):
         else:
             self.pdf_view.setFixedHeight(0)
 
+    def updateImageSize(self):
+        if self.original_pixmap:
+            self.image_label.show()
+            scaled = self.original_pixmap.scaled(
+                self.image_label.width() - 30,
+                self.original_pixmap.height(),
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation,
+            )
+            self.image_label.setPixmap(scaled)
+        else:
+            self.image_label.hide()
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if hasattr(self, "pdf_view") and self.pdf_view:
             self.setPdfSize()
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.setPdfSize()
+        if self.image_label.pixmap():
+            pixmap = self.image_label.pixmap()
+            if not pixmap.isNull():
+                self.updateImageSize()
