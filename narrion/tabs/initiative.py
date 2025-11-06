@@ -10,15 +10,14 @@ from PySide6.QtWidgets import (
     QInputDialog,
     QMessageBox,
     QPushButton,
+    QSizePolicy,
     QSpinBox,
     QStyledItemDelegate,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
-    QSizePolicy,
 )
-
 import qtawesome as qta
 
 from widgets.section_header import SectionHeader

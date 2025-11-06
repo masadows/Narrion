@@ -1,23 +1,23 @@
+import json
 from pathlib import Path
 import shutil
-import json
 
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QDragEnterEvent, QDropEvent
 from PySide6.QtWidgets import (
+    QCheckBox,
+    QFileDialog,
     QHBoxLayout,
     QInputDialog,
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QTextEdit,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
-    QFileDialog,
     QWidget,
-    QCheckBox,
-    QScrollArea,
 )
 
 from widgets.section_header import SectionHeader
@@ -125,7 +125,9 @@ def build(current_session: str) -> QWidget:
     btns.addWidget(btn_import)
     left.addLayout(btns)
 
-    tree.itemClicked.connect(lambda item: open_note_in_editor(item, editor, checkbox_layout, btn_add_checkbox))
+    tree.itemClicked.connect(
+        lambda item: open_note_in_editor(item, editor, checkbox_layout, btn_add_checkbox)
+    )
     btn_new_note.clicked.connect(lambda: create_new_note(tree))
     btn_new_folder.clicked.connect(lambda: create_new_folder(tree))
     btn_delete.clicked.connect(lambda: delete_item(tree, editor))
@@ -162,7 +164,9 @@ def refresh_tree(tree: QTreeWidget):
             add_folder_items(top_item, item)
 
 
-def open_note_in_editor(item: QTreeWidgetItem, editor: QTextEdit, checkbox_layout, add_checkbox_button):
+def open_note_in_editor(
+    item: QTreeWidgetItem, editor: QTextEdit, checkbox_layout, add_checkbox_button
+):
     path = Path(item.data(0, 256))
 
     if path.is_dir():
@@ -226,10 +230,7 @@ def collect_checkbox_data(layout):
     for i in range(layout.count()):
         widget = layout.itemAt(i).widget()
         if isinstance(widget, QCheckBox):
-            result.append({
-                "text": widget.text(),
-                "checked": widget.isChecked()
-            })
+            result.append({"text": widget.text(), "checked": widget.isChecked()})
     return result
 
 
@@ -239,9 +240,11 @@ def save_current_note(editor: QTextEdit):
     try:
         data = {
             "text": editor.toPlainText(),
-            "checkboxes": collect_checkbox_data(editor.checkbox_layout)
+            "checkboxes": collect_checkbox_data(editor.checkbox_layout),
         }
-        editor.current_file.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        editor.current_file.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
     except Exception as e:
         print("Błąd zapisu:", e)
 
@@ -260,7 +263,9 @@ def create_new_note(tree: QTreeWidget):
     if ok and name.strip():
         new_file = target_folder / f"{name.strip()}.json"
         if not new_file.exists():
-            new_file.write_text(json.dumps({"text": "", "checkboxes": []}, indent=2), encoding="utf-8")
+            new_file.write_text(
+                json.dumps({"text": "", "checkboxes": []}, indent=2), encoding="utf-8"
+            )
             refresh_tree(tree)
 
 
@@ -281,8 +286,12 @@ def delete_item(tree: QTreeWidget, editor: QTextEdit):
     if not path.exists():
         return
 
-    reply = QMessageBox.question(tree, "Usuń", f"Czy na pewno chcesz usunąć '{path.name}'?",
-                                 QMessageBox.Yes | QMessageBox.No)
+    reply = QMessageBox.question(
+        tree,
+        "Usuń",
+        f"Czy na pewno chcesz usunąć '{path.name}'?",
+        QMessageBox.Yes | QMessageBox.No,
+    )
     if reply != QMessageBox.Yes:
         return
 
@@ -305,7 +314,9 @@ def export_note(editor: QTextEdit):
         QMessageBox.warning(editor, "Brak notatki", "Nie wybrano żadnej notatki!")
         return
 
-    path, _ = QFileDialog.getSaveFileName(editor, "Eksportuj notatkę", editor.current_file.name, "JSON (*.json)")
+    path, _ = QFileDialog.getSaveFileName(
+        editor, "Eksportuj notatkę", editor.current_file.name, "JSON (*.json)"
+    )
     if path:
         shutil.copy(editor.current_file, path)
         QMessageBox.information(editor, "Sukces", "Wyeksportowano!")
