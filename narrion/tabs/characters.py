@@ -10,16 +10,29 @@ from PySide6.QtWidgets import (
 
 from widgets.section_header import SectionHeader
 
-from .player import CharacterWidget
+from .character import CharacterWidget
+from enum import Enum, auto
+from pathlib import Path
+import json
+
+
+class CharacterType(Enum):
+    Player = auto()
+    NPC = auto()
 
 
 class CharactersWidget(QWidget):
-    def __init__(self):
+    CARACTERS_DIR = Path("data/characters")
+
+    def __init__(self, type: CharacterType = CharacterType.Player):
         super().__init__()
         self.layout = QHBoxLayout(self)
 
         self.left = QVBoxLayout()
-        self.left.addWidget(SectionHeader("Gracze"))
+        if type == CharacterType.Player:
+            self.left.addWidget(SectionHeader("Gracze"))
+        else:
+            self.left.addWidget(SectionHeader("NPC"))
 
         self.char_list = QListWidget()
         self.char_list.setObjectName("characterList")
@@ -28,12 +41,13 @@ class CharactersWidget(QWidget):
         for p in ["Aldren (Gracz)", "Mira (Gracz)", "Szablozębny (NPC)"]:
             self.char_list.addItem(p)
             self.player_list[p] = CharacterWidget(p)
+        self.load_characters(CharacterType.Player)
 
-        self.char_list.itemClicked.connect(self.open_selected_player)
+        self.char_list.itemClicked.connect(self.open_selected_character)
         self.left.addWidget(self.char_list)
 
-        self.add_player_button = QPushButton("Dodaj gracza")
-        self.add_player_button.clicked.connect(self.create_new_player)
+        self.add_player_button = QPushButton("Dodaj postać")
+        self.add_player_button.clicked.connect(self.create_new_character)
         self.left.addWidget(self.add_player_button)
 
         self.left_container = QWidget()
@@ -50,17 +64,17 @@ class CharactersWidget(QWidget):
         self.right_container = first_player_widget
         self.layout.addWidget(self.right_container, stretch=1)
 
-    def create_new_player(self):
-        name, ok = QInputDialog.getText(self, "Nowy gracz", "Nazwa postaci")
+    def create_new_character(self):
+        name, ok = QInputDialog.getText(self, "Nowa postać", "Nazwa postaci")
         if ok and name.strip():
             name = name.strip()
             if name in self.player_list:
-                QMessageBox.warning(self, "Błąd", f"Gracz o nazwie '{name}' już istnieje!")
+                QMessageBox.warning(self, "Błąd", f"Postać o nazwie '{name}' już istnieje!")
                 return
             self.char_list.addItem(name)
             self.player_list[name] = CharacterWidget(name)
 
-    def open_selected_player(self, item):
+    def open_selected_character(self, item):
         name = item.text()
         player_widget = self.player_list[name]
 
@@ -70,6 +84,21 @@ class CharactersWidget(QWidget):
         self.right_container = player_widget
         self.layout.addWidget(self.right_container, stretch=1)
 
+    def load_characters(self, type: CharacterType):
+        type_dir = CharactersWidget.CARACTERS_DIR / type.name
+        type_dir.mkdir(parents=True, exist_ok=True)
+        if type == CharacterType.Player:
+            for item in type_dir.iterdir():
+                if item.is_file() and item.suffix == ".json":
+                    with item.open("r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    self.char_list.addItem(item.stem)
+                    self.player_list[item.stem] = CharacterWidget(item.stem)
+
+        else:
+            pass
+
 
 def build() -> QWidget:
+    CharactersWidget.CARACTERS_DIR.mkdir(parents=True, exist_ok=True)
     return CharactersWidget()
