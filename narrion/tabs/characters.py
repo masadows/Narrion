@@ -1,3 +1,7 @@
+from enum import Enum, auto
+import json
+from pathlib import Path
+
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QInputDialog,
@@ -11,9 +15,6 @@ from PySide6.QtWidgets import (
 from widgets.section_header import SectionHeader
 
 from .character import CharacterWidget
-from enum import Enum, auto
-from pathlib import Path
-import json
 
 
 class CharacterType(Enum):
@@ -92,6 +93,7 @@ class CharactersWidget(QWidget):
                 if item.is_file() and item.suffix == ".json":
                     with item.open("r", encoding="utf-8") as f:
                         data = json.load(f)
+                        data.get("name", None)
                     self.char_list.addItem(item.stem)
                     self.player_list[item.stem] = CharacterWidget(item.stem)
 
