@@ -43,12 +43,26 @@ QListWidget {
     border-radius: 4px;
 }
 
+QListWidget:focus {
+    outline: none;
+}
+
 QListWidget::item {
     background-color: #122327;
     border-bottom: 1px solid #1e3a40;
     padding: 10px;
     color: #8faeb3;
     margin: 2px 4px;
+    min-width: 140px;
+    min-height: 60px;
+}
+
+QListWidget#characterList::item {
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 4px;
+    min-width: 60px;
+    min-height: 0px;
 }
 
 QListWidget::item:hover {

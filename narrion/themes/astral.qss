@@ -208,11 +208,28 @@ QCalendarWidget QAbstractItemView:enabled:hover {
     background: #5a5f7a;
 }
 
+QListWidget:focus {
+    outline: none;
+}
+
 QListWidget::item {
-    border-radius: 4px;
-    padding: 5px;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 8px;
+    min-width: 160px;
+    min-height: 80px;
+    text-align: center;
+    border: 1px solid #44475a;
     color: #f8f8f2;
 }
+QListWidget#characterList::item {
+    border-radius: 8px;
+    padding: 6px;
+    margin: 3px;
+    min-width: 60px;
+    min-height: 0px;
+}
+
 QListWidget::item:selected {
     background: #44475a;
     border: 1px solid #bd93f9;

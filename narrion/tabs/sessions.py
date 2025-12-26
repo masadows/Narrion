@@ -15,7 +15,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from tabs.characters import build_npcs, build_players
+from tabs.characters import CharacterType
+from tabs.characters import build as build_characters
 from tabs.notes import build as build_notes
 
 
@@ -41,6 +42,7 @@ class SessionsTab(QWidget):
     def _build_session_list_ui(self):
         """Ekran startowy z listą sesji"""
         self._clear_layout()
+        self.current_session = None
 
         title = QLabel("<h2>Twoje sesje RPG</h2>")
         title.setAlignment(Qt.AlignCenter)
@@ -83,8 +85,8 @@ class SessionsTab(QWidget):
 
         tabs = QTabWidget()
         tabs.addTab(build_notes(self.SESSIONS_DIR / self.current_session), "Notatki")
-        tabs.addTab(build_players(), "Gracze")
-        tabs.addTab(build_npcs(), "Baza NPC")
+        tabs.addTab(build_characters(self.current_session, CharacterType.Player), "Gracze")
+        tabs.addTab(build_characters(self.current_session, CharacterType.NPC), "Baza NPC")
 
         self.layout.addWidget(back_btn)
         self.layout.addWidget(label)
@@ -96,7 +98,8 @@ class SessionsTab(QWidget):
             name = name.strip()
             if name not in self.sessions:
                 self.sessions.append(name)
-                self.session_list.addItem(name)
+                if not self.current_session:
+                    self.session_list.addItem(name)
                 (self.SESSIONS_DIR / name).mkdir(parents=True, exist_ok=True)
             else:
                 QMessageBox.warning(self, "Błąd", "Sesja o tej nazwie już istnieje.")
@@ -129,10 +132,18 @@ class SessionsTab(QWidget):
 
     def _clear_layout(self):
         """Czyści cały layout (używane przy przełączaniu widoków)"""
-        while self.layout.count():
-            child = self.layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+        self._clear_layout_recursive(self.layout)
+
+    def _clear_layout_recursive(self, layout):
+        if layout is None:
+            return
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            elif item.layout() is not None:
+                self._clear_layout_recursive(item.layout())
 
 
 def build():
