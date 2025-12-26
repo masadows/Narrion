@@ -25,10 +25,11 @@ class CharacterType(Enum):
 
 
 class CharactersWidget(QWidget):
-    CHARACTERS_DIR = Path("data/characters")
-
-    def __init__(self, char_type: CharacterType = CharacterType.Player):
+    def __init__(self, campaign, char_type: CharacterType = CharacterType.Player):
         super().__init__()
+        self.CHARACTERS_DIR = Path(f"data/sessions/{campaign}/characters")
+        self.CHARACTERS_DIR.mkdir(parents=True, exist_ok=True)
+        self.campaign = campaign
         self.char_type = char_type
         self.layout = QHBoxLayout(self)
 
@@ -125,7 +126,7 @@ class CharactersWidget(QWidget):
 
     def add_character_to_list(self, name: str):
         self.char_list.addItem(name)
-        self.loaded_widgets[name] = CharacterWidget(name)
+        self.loaded_widgets[name] = CharacterWidget(self.campaign, name)
 
     def open_selected_character(self, item):
         if not item:
@@ -211,3 +212,7 @@ def build_players() -> QWidget:
 def build_npcs() -> QWidget:
     CharactersWidget.CHARACTERS_DIR.mkdir(parents=True, exist_ok=True)
     return CharactersWidget(CharacterType.NPC)
+
+
+def build(campaign, type: CharacterType) -> QWidget:
+    return CharactersWidget(campaign, type)

@@ -17,19 +17,20 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 import qtawesome as qta
+from shiboken6 import isValid
 
+from themes import DEFAULT_FONT
 from widgets.color_wrapper import color
 from widgets.section_header import SectionHeader
-from themes import DEFAULT_FONT
 
 
 @color
 class CharacterWidget(QWidget):
-    def __init__(self, name, char_type="Player"):
+    def __init__(self, campaign, name, char_type="Player"):
         super().__init__()
         self.name = name
         self.char_type = char_type
-        self.file_path = Path(f"data/characters/{char_type}/{name}.json")
+        self.file_path = Path(f"data/sessions/{campaign}/characters/{char_type}/{name}.json")
         self.current_image_path = None
 
         self.layout = QVBoxLayout(self)
@@ -236,4 +237,5 @@ class CharacterWidget(QWidget):
         self.updateImageSize()
 
     def changeFontColor(self, icon_color):
-        self.change_btn.setIcon(qta.icon("mdi.file-account", color=icon_color))
+        if isValid(self.change_btn):
+            self.change_btn.setIcon(qta.icon("mdi.file-account", color=icon_color))
