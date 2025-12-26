@@ -18,9 +18,9 @@ from PySide6.QtWidgets import (
 )
 import qtawesome as qta
 
+from themes import DEFAULT_FONT
 from widgets.color_wrapper import color
 from widgets.section_header import SectionHeader
-from themes import DEFAULT_FONT
 
 
 @color

@@ -3,6 +3,8 @@ from itertools import chain
 import os
 import random
 
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QColor, QIcon, QPainter
 from PySide6.QtWidgets import (
     QGridLayout,
     QGroupBox,
@@ -13,8 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PySide6.QtGui import QIcon, QPainter, QColor
-from PySide6.QtCore import QSize
+
 from themes import DEFAULT_FONT
 from widgets.color_wrapper import color
 

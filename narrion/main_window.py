@@ -22,7 +22,7 @@ from tabs.calendar import build as build_calendar
 from tabs.dice.dice import build as build_dice
 from tabs.initiative import build as build_initiative
 from tabs.sessions import build as build_sessions
-from themes import THEMES, DEFAULT_FONT
+from themes import DEFAULT_FONT, THEMES
 from widgets.color_wrapper import COLOR_LISTENERS
 
 
