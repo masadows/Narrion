@@ -15,9 +15,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from tabs.characters import build as build_characters
+from tabs.characters import build_npcs, build_players
 from tabs.notes import build as build_notes
-from tabs.npc import build as build_npc
 
 
 class SessionsTab(QWidget):
@@ -84,8 +83,8 @@ class SessionsTab(QWidget):
 
         tabs = QTabWidget()
         tabs.addTab(build_notes(self.SESSIONS_DIR / self.current_session), "Notatki")
-        tabs.addTab(build_characters(), "Gracze")
-        tabs.addTab(build_npc(), "Baza NPC")
+        tabs.addTab(build_players(), "Gracze")
+        tabs.addTab(build_npcs(), "Baza NPC")
 
         self.layout.addWidget(back_btn)
         self.layout.addWidget(label)

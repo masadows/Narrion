@@ -9,5 +9,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
-    win.showMaximized()
+    win.showNormal()
     sys.exit(app.exec())
