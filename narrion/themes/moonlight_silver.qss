@@ -167,3 +167,70 @@ QCalendarWidget QAbstractItemView:enabled:hover {
     background: #1b353b;
     color: #ffffff;
 }
+
+QTreeWidget {
+    background-color: #0a1416;
+    border: 1px solid #2c4e54;
+    color: #a8dadd;
+    outline: none;
+}
+
+QTreeWidget::item {
+    color: #8faeb3;
+    padding: 6px;
+    border-bottom: 1px solid #1e3a40;
+}
+
+QTreeWidget::item:hover {
+    background-color: #1b353b;
+    color: #ffffff;
+}
+
+QTreeWidget::item:selected {
+    background-color: #23464d;
+    color: #ffffff;
+}
+
+QTreeWidget::item:selected:active {
+    background-color: #23464d;
+}
+
+QToolButton {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #162e33, stop:1 #0f2024);
+    border: 1px solid #2c4e54;
+    border-radius: 2px;
+    color: #a8dadd;
+    padding: 4px;
+}
+
+QToolButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #23464d, stop:1 #1b353b);
+    border: 1px solid #4fd1c5;
+    color: #ffffff;
+}
+
+QToolButton:pressed {
+    background-color: #4fd1c5;
+    color: #000000;
+    border: 1px solid #2c4e54;
+}
+
+QToolButton:checked {
+    background-color: #23464d;
+    border: 1px solid #4fd1c5;
+    color: #ffffff;
+}
+
+QTextEdit {
+    background-color: #080f11;
+    border: 1px solid #2c4e54;
+    color: #a8dadd;
+    font-family: 'Consolas', monospace;
+    selection-background-color: #4fd1c5;
+    selection-color: #000000;
+}
+
+QWidget {
+    selection-background-color: #4fd1c5;
+    selection-color: #000000;
+}

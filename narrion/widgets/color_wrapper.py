@@ -4,10 +4,12 @@ COLOR_LISTENERS = list()
 
 
 def color(cls):
-    @functools.wraps(cls)
-    def register_class(*args, **kwargs):
-        new_class = cls(*args, **kwargs)
-        COLOR_LISTENERS.append(new_class)
-        return new_class
+    original_init = cls.__init__
 
-    return register_class
+    @functools.wraps(original_init)
+    def new_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        COLOR_LISTENERS.append(self)
+
+    cls.__init__ = new_init
+    return cls

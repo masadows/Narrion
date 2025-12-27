@@ -207,3 +207,79 @@ QPushButton#menuButtons:checked {
     color: #222;
     font-weight: bold;
 }
+
+QTreeWidget {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #f1efff, stop:1 #e2def7);
+    border: 1px solid #b3aee3;
+    color: #2a2a3b;
+    outline: none;
+    border-radius: 6px;
+}
+
+QTreeWidget::item {
+    padding: 6px;
+    color: #2a2a3b;
+    border: 1px solid transparent;
+}
+
+QTreeWidget::item:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #e7e4ff, stop:1 #ccc8f2);
+    color: #2a2a3b;
+}
+
+QTreeWidget::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #d1ccf3, stop:1 #bcb7e8);
+    color: #1a1a2a;
+}
+
+QTreeWidget::item:selected:active {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #d1ccf3, stop:1 #bcb7e8);
+}
+
+QToolButton {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #edeaff, stop:1 #d8d4f7);
+    border: 1px solid #a6a0dc;
+    border-radius: 6px;
+    padding: 4px;
+    color: #2a2a3b;
+    font-weight: 600;
+}
+
+QToolButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #e0dcff, stop:1 #c9c4f0);
+    border-color: #8c87cf;
+}
+
+QToolButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #bbb4e0, stop:1 #a39bd1);
+}
+
+QToolButton:checked {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #d8d4f7, stop:1 #c1bcf0);
+    border: 1px solid #7a74c3;
+    color: #1a1a2a;
+}
+
+QTextEdit {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #f1efff, stop:1 #e2def7);
+    border: 1px solid #b3aee3;
+    color: #2a2a3b;
+    border-radius: 6px;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    selection-background-color: #7a74c3;
+    selection-color: #ffffff;
+}
+
+QWidget {
+    selection-background-color: #7a74c3;
+    selection-color: #ffffff;
+}

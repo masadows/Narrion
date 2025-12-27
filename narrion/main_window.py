@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         side_layout.setSpacing(0)
 
         self.buttons_info = [
-            ("Sesje RPG", "fa5s.book-open", 0),
+            ("Kampanie RPG", "fa5s.book-open", 0),
             ("Battlemapy", "fa5s.map", 1),
             ("Terminarz", "fa5s.calendar-alt", 2),
             ("Kości", "fa5s.dice-d20", "dice"),

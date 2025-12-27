@@ -255,3 +255,77 @@ QScrollBar::handle:vertical:hover {
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     background: none;
 }
+
+QTreeWidget {
+    background-color: #0f0f0f;
+    border: 1px solid #333;
+    color: #e0e0e0;
+    outline: none;
+}
+
+QTreeWidget::item {
+    padding: 4px;
+    border: 1px solid transparent;
+}
+
+QTreeWidget::item:hover {
+    background-color: #1e1e1e;
+    color: #ebd396;
+}
+
+QTreeWidget::item:selected {
+    background-color: #c5a059;
+    color: #000000;
+}
+
+QTreeWidget::item:selected:active {
+    background-color: #c5a059;
+}
+
+QTreeWidget::item:selected:!active {
+    background-color: #3e2723;
+    color: #c5a059;
+}
+
+QToolButton {
+    background-color: #1e1e1e;
+    border: 1px solid #c5a059;
+    border-radius: 4px;
+    color: #c5a059;
+    padding: 4px;
+}
+
+QToolButton:hover {
+    background-color: #2d2d2d;
+    border: 1px solid #ebd396;
+    color: #ebd396;
+}
+
+QToolButton:checked {
+    background-color: #c5a059;
+    border: 1px solid #c5a059;
+    color: #000000;
+}
+
+QToolButton:pressed {
+    background-color: #8d733b;
+    color: #000000;
+}
+
+QTextEdit {
+    background-color: #0d0d0d;
+    border: 1px solid #333;
+    color: #e0e0e0;
+    font-family: 'Consolas', monospace;
+    selection-background-color: #c5a059;
+    selection-color: #000000;
+}
+
+QTextEdit:focus {
+    border: 1px solid #c5a059;
+}
+
+QWidget {
+    selection-background-color: #c5a059;
+    selection-color: #000000;
+}
