@@ -177,3 +177,71 @@ QCalendarWidget QAbstractItemView:enabled:selected {
 QCalendarWidget QAbstractItemView:enabled:hover {
     background: #4f545c;
 }
+
+QTreeWidget {
+    background-color: #202225;
+    border: none;
+    border-radius: 8px;
+    color: #dcddde;
+    padding: 4px;
+    outline: none;
+}
+
+QTreeWidget::item {
+    padding: 6px;
+    color: #b9bbbe;
+    border: none;
+}
+
+QTreeWidget::item:hover {
+    background-color: #32353b;
+    color: #dcddde;
+}
+
+QTreeWidget::item:selected {
+    background-color: #40444b;
+    color: #ffffff;
+    border-bottom: 3px solid #5865F2; 
+    padding-left: 3px;
+}
+
+QTreeWidget::item:selected:active {
+    background-color: #40444b;
+}
+
+QToolButton {
+    background-color: #40444b;
+    border: none;
+    border-radius: 4px;
+    color: #ffffff;
+    padding: 6px;
+}
+
+QToolButton:hover {
+    background-color: #4f545c;
+}
+
+QToolButton:pressed {
+    background-color: #202225;
+}
+
+QToolButton:checked {
+    background-color: #5865F2;
+    color: #ffffff;
+}
+
+QTextEdit {
+    background-color: #202225;
+    border: none;
+    border-radius: 8px;
+    color: #dcddde;
+    padding: 10px;
+    font-family: 'Consolas', monospace;
+    selection-background-color: #5865F2;
+    selection-color: #ffffff;
+}
+
+QWidget {
+    selection-background-color: #5865F2;
+    selection-color: #ffffff;
+}

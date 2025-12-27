@@ -144,7 +144,20 @@ QPushButton#menuButtons:checked {
     font-weight: bold;
 }
 
-/* === QCalendarWidget - Czarno-biały styl === */
+QListWidget::item {
+    border-radius: 8px;
+    padding: 10px;
+    margin: 6px;
+    border: 1px solid #000;
+}
+
+QListWidget::item:hover {
+    background-color: #3a3a3a;
+}
+
+QListWidget::item:selected {
+    background-color: #292929;
+}
 
 QCalendarWidget {
     background-color: #1a1a1a;
@@ -153,7 +166,6 @@ QCalendarWidget {
     border-radius: 6px;
 }
 
-/* Pasek tytułu (nazwa miesiąca i strzałki) */
 QCalendarWidget QToolButton {
     background-color: #2a2a2a;
     color: #ffffff;
@@ -171,14 +183,12 @@ QCalendarWidget QToolButton:pressed {
     background-color: #505050;
 }
 
-/* Menu miesięcy i lat */
 QCalendarWidget QMenu {
     background-color: #1a1a1a;
     color: #ffffff;
     border: 1px solid #444;
 }
 
-/* Spinbox roku */
 QCalendarWidget QSpinBox {
     background-color: #2a2a2a;
     color: #ffffff;
@@ -237,4 +247,67 @@ QCalendarWidget QTableView QHeaderView::section {
     color: #cccccc;
     border: none;
 
+}
+
+QTreeWidget {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    outline: 0;
+}
+
+QTreeWidget::item {
+    color: #e0e0e0;
+}
+
+QTreeWidget::item:hover {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+QTreeWidget::item:selected {
+    background-color: #444;
+    color: #ffffff;
+    border: none;
+}
+
+QTreeWidget::item:selected:active {
+    background-color: #505050;
+}
+
+QToolButton {
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    color: #e0e0e0;
+    padding: 4px;
+}
+
+QToolButton:hover {
+    background-color: #3a3a3a;
+    border-color: #555;
+}
+
+QToolButton:checked {
+    background-color: #505050;
+    border: 1px solid #666;
+    color: #ffffff;
+}
+
+QToolButton:pressed {
+    background-color: #111;
+}
+
+QTextEdit {
+    border: 1px solid #333;
+    background-color: #111;
+    color: #e0e0e0;
+    font-family: 'Consolas', monospace;
+    selection-background-color: #444;
+    selection-color: #ffffff;
+}
+
+QWidget {
+    selection-background-color: #555;
+    selection-color: #ffffff;
 }

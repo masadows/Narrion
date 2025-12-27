@@ -15,9 +15,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from narrion.tabs.notes.notes import build as build_notes
 from tabs.characters import CharacterType
 from tabs.characters import build as build_characters
-from tabs.notes import build as build_notes
 
 
 class SessionsTab(QWidget):
@@ -44,7 +44,7 @@ class SessionsTab(QWidget):
         self._clear_layout()
         self.current_session = None
 
-        title = QLabel("<h2>Twoje sesje RPG</h2>")
+        title = QLabel("<h2>Twoje kampanie RPG</h2>")
         title.setAlignment(Qt.AlignCenter)
 
         self.session_list = QListWidget()
@@ -61,9 +61,9 @@ class SessionsTab(QWidget):
         self.session_list.itemDoubleClicked.connect(self.open_selected_session)
 
         btn_layout = QHBoxLayout()
-        new_btn = QPushButton("➕ Nowa sesja")
+        new_btn = QPushButton("➕ Nowa kampania")
         new_btn.clicked.connect(self.add_session)
-        delete_btn = QPushButton("🗑️ Usuń sesję")
+        delete_btn = QPushButton("🗑️ Usuń kampanię")
         delete_btn.clicked.connect(self.delete_session)
         btn_layout.addWidget(new_btn)
         btn_layout.addWidget(delete_btn)
@@ -77,10 +77,10 @@ class SessionsTab(QWidget):
         """Ekran sesji z zakładkami"""
         self._clear_layout()
 
-        back_btn = QPushButton("⬅ Wróć do listy sesji")
+        back_btn = QPushButton("⬅ Wróć do listy kampanii")
         back_btn.clicked.connect(self._build_session_list_ui)
 
-        label = QLabel(f"<h3>Sesja: {self.current_session}</h3>")
+        label = QLabel(f"<h3>Kampania: {self.current_session}</h3>")
         label.setAlignment(Qt.AlignCenter)
 
         tabs = QTabWidget()
@@ -93,7 +93,7 @@ class SessionsTab(QWidget):
         self.layout.addWidget(tabs)
 
     def add_session(self):
-        name, ok = QInputDialog.getText(self, "Nowa sesja", "Podaj nazwę sesji:")
+        name, ok = QInputDialog.getText(self, "Nowa kampania", "Podaj nazwę kampanii:")
         if ok and name.strip():
             name = name.strip()
             if name not in self.sessions:
@@ -102,19 +102,19 @@ class SessionsTab(QWidget):
                     self.session_list.addItem(name)
                 (self.SESSIONS_DIR / name).mkdir(parents=True, exist_ok=True)
             else:
-                QMessageBox.warning(self, "Błąd", "Sesja o tej nazwie już istnieje.")
+                QMessageBox.warning(self, "Błąd", "Kampania o tej nazwie już istnieje.")
 
     def delete_session(self):
         item = self.session_list.currentItem()
         if not item:
-            QMessageBox.information(self, "Info", "Nie wybrano żadnej sesji.")
+            QMessageBox.information(self, "Info", "Nie wybrano żadnej kampanii.")
             return
 
         name = item.text()
         confirm = QMessageBox.question(
             self,
             "Potwierdzenie",
-            f"Czy na pewno chcesz usunąć sesję '{name}'?",
+            f"Czy na pewno chcesz usunąć kampanię '{name}'?",
             QMessageBox.Yes | QMessageBox.No,
         )
         if confirm == QMessageBox.Yes:

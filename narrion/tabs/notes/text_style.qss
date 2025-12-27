@@ -1,0 +1,12 @@
+QToolButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 2px;
+}
+
+QTextEdit {
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 11pt;
+}
