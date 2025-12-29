@@ -1,32 +1,33 @@
-from transformers import CLIPProcessor
-import onnxruntime as ort
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+import onnxruntime as ort
 from PIL import Image
+from transformers import CLIPProcessor
 
 
 class ModelLogic:
-    def __init__(self, model_folder="onnx-export"):
+    def __init__(self, model_folder="onnx-clip"):
         current_file_path = Path(__file__).resolve()
-        self.base_path = current_file_path.parents[3] / "models" /model_folder_name
-        
-        print(f"Szukam modelu w: {self.base_path}")
-        
+        self.base_path = current_file_path.parents[3] / "models" / model_folder
+
         if not self.base_path.exists():
             raise FileNotFoundError(f"Nie znaleziono folderu modelu: {self.base_path}")
 
-        self.processor = CLIPProcessor.from_pretrained(str(self.base_path))
-        
+        self.processor = CLIPProcessor.from_pretrained(str(self.base_path), use_fast=False)
+
         sess_options = ort.SessionOptions()
         sess_options.log_severity_level = 3
-        
+
         self.img_session = ort.InferenceSession(
-            str(self.base_path / "image_model.onnx"), 
-            sess_options, providers=['CPUExecutionProvider']
+            str(self.base_path / "image_model.onnx"),
+            sess_options,
+            providers=["CPUExecutionProvider"],
         )
         self.txt_session = ort.InferenceSession(
-            str(self.base_path / "text_model.onnx"), 
-            sess_options, providers=['CPUExecutionProvider']
+            str(self.base_path / "text_model.onnx"),
+            sess_options,
+            providers=["CPUExecutionProvider"],
         )
 
     def process_image(self, image_path):
@@ -40,19 +41,15 @@ class ModelLogic:
 
     def process_text(self, text):
         inputs = self.processor(
-            text=[text], 
-            return_tensors="np", 
-            padding="max_length", 
-            max_length=77, 
-            truncation=True
+            text=[text], return_tensors="np", padding="max_length", max_length=77, truncation=True
         )
 
         outputs = self.txt_session.run(
             ["text_embeddings"],
             {
                 "input_ids": inputs["input_ids"].astype(np.int64),
-                "attention_mask": inputs["attention_mask"].astype(np.float32) 
-            }
+                "attention_mask": inputs["attention_mask"].astype(np.float32),
+            },
         )
         emb = outputs[0]
         return emb / np.linalg.norm(emb, axis=1, keepdims=True)
