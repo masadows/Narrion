@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from huggingface_hub import snapshot_download
 import numpy as np
 import onnxruntime as ort
 from PIL import Image
@@ -8,11 +9,11 @@ from transformers import CLIPProcessor
 
 class ModelLogic:
     def __init__(self, model_folder="onnx-clip"):
+        self.repo_id = "Rpgshit/battlemap-clip-model"
         current_file_path = Path(__file__).resolve()
         self.base_path = current_file_path.parents[3] / "models" / model_folder
 
-        if not self.base_path.exists():
-            raise FileNotFoundError(f"Nie znaleziono folderu modelu: {self.base_path}")
+        self.ensure_model_exists()
 
         self.processor = CLIPProcessor.from_pretrained(str(self.base_path), use_fast=False)
 
@@ -29,6 +30,23 @@ class ModelLogic:
             sess_options,
             providers=["CPUExecutionProvider"],
         )
+
+    def ensure_model_exists(self):
+        required_files = ["image_model.onnx", "text_model.onnx"]
+        missing = False
+
+        if not self.base_path.exists():
+            missing = True
+        else:
+            for f in required_files:
+                if not (self.base_path / f).exists():
+                    missing = True
+                    break
+
+        if missing:
+            snapshot_download(
+                repo_id=self.repo_id, local_dir=self.base_path, local_dir_use_symlinks=False
+            )
 
     def process_image(self, image_path):
         image = Image.open(image_path).convert("RGB")
