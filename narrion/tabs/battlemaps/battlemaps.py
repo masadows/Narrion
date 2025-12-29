@@ -3,7 +3,7 @@ import pickle
 
 import numpy as np
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtGui import QDesktopServices, QGuiApplication
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
@@ -50,13 +50,25 @@ class BattlemapsWidget(QWidget):
         self.icon_reset = qta.icon("fa5s.times", color=DEFAULT_FONT["icon_color"])
         self.icon_file = qta.icon("fa5s.image", color=DEFAULT_FONT["icon_color"])
 
-        try:
-            self.logic = ModelLogic(model_folder="onnx-clip")
-        except Exception as e:
-            print(f"Błąd modelu: {e}")
+        self.logic = None
 
         self.load_favorites()
         self.init_ui()
+
+    def ensure_model_loaded(self):
+        if self.logic is not None:
+            return True
+
+        QGuiApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            self.logic = ModelLogic(model_folder="onnx-clip")
+            return True
+        except Exception as e:
+            QMessageBox.critical(self, "Błąd modelu", f"Nie udało się załadować modelu AI:\n{e}")
+            self.logic = None
+            return False
+        finally:
+            QGuiApplication.restoreOverrideCursor()
 
     def init_ui(self):
         v = QVBoxLayout(self)
@@ -234,8 +246,7 @@ class BattlemapsWidget(QWidget):
             self.map_list.clear()
 
     def scan_folder(self):
-        if not self.logic:
-            QMessageBox.critical(self, "Błąd", "Model AI nie jest załadowany!")
+        if not self.ensure_model_loaded():
             return
 
         folder = QFileDialog.getExistingDirectory(self, "Wybierz folder z mapami")
@@ -330,7 +341,10 @@ class BattlemapsWidget(QWidget):
 
     def perform_search(self):
         query = self.search_input.text()
-        if not query or self.embeddings_np is None:
+        if not query or self.embeddings_np is None or self.embeddings_np is None:
+            return
+
+        if not self.ensure_model_loaded():
             return
 
         self.btn_show_favs.setChecked(False)
