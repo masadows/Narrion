@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 )
 import qtawesome as qta
 
-from tabs.battlemaps import build as build_battlemaps
+from narrion.tabs.battlemaps.battlemaps import build as build_battlemaps
 from tabs.calendar import build as build_calendar
 from tabs.dice.dice import build as build_dice
 from tabs.initiative import build as build_initiative

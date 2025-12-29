@@ -6,3 +6,6 @@ pyside6
 -e .
 numpy
 qtawesome
+onnxruntime
+pillow
+transformers

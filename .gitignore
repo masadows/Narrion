@@ -229,3 +229,5 @@ __marimo__/
 # vim
 *.swp
 *.swo
+
+*models/onnx-clip
