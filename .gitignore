@@ -230,3 +230,5 @@ __marimo__/
 *.swp
 *.swo
 token.pickle
+
+*models/onnx-clip

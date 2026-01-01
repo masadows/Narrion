@@ -19,3 +19,6 @@ def get_icon_color_from_qss(path):
 for qss_file in theme_folder.glob("*.qss"):
     name = qss_file.stem.replace("_", " ").title()
     THEMES[name] = {"path": str(qss_file), "icon_color": QColor(get_icon_color_from_qss(qss_file))}
+
+_key, _value = next(iter(THEMES.items()))
+DEFAULT_FONT = dict(name=_key, icon_color=_value["icon_color"])
