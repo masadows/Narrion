@@ -229,3 +229,4 @@ __marimo__/
 # vim
 *.swp
 *.swo
+token.pickle
