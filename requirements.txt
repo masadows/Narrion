@@ -6,12 +6,9 @@ pyside6
 -e .
 numpy
 qtawesome
-<<<<<<< HEAD
 google-api-python-client
 google-auth
 google-auth-oauthlib
-=======
 onnxruntime
 pillow
 transformers
->>>>>>> 7eac162fbc3da5f6277ffe3ad18252643d815dde
