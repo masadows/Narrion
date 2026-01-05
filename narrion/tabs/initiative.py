@@ -1,4 +1,3 @@
-import os
 from typing import List
 
 from PySide6.QtCore import QSize, Qt
@@ -20,6 +19,8 @@ from PySide6.QtWidgets import (
 )
 import qtawesome as qta
 
+from themes import DEFAULT_FONT
+from widgets.color_wrapper import color
 from widgets.section_header import SectionHeader
 
 
@@ -73,6 +74,7 @@ class StatusItemDelegate(QStyledItemDelegate):
         editor.setGeometry(option.rect)
 
 
+@color
 class InitiativeTracker(QWidget):
     """Initiative tracker widget."""
 
@@ -127,10 +129,8 @@ class InitiativeTracker(QWidget):
         controls.addWidget(self.sort_btn)
 
         self.next_btn = QPushButton()
-        image_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../icones/next-button.svg"
-        )
-        self.next_btn.setIcon(QIcon(image_path))
+        self.next_btn.setIcon(QIcon(qta.icon("mdi.skip-next", color=DEFAULT_FONT["icon_color"])))
+        self.next_btn.icon_name = "mdi.skip-next"
         self.next_btn.setIconSize(QSize(20, 20))
         self.next_btn.setToolTip("Następna tura")
         self.next_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -308,11 +308,14 @@ class InitiativeTracker(QWidget):
         super().resizeEvent(event)
         if self.table.width() < self.BUTTONS_RESIZE_THRESHOLD:
             self.add_btn.setText("")
-            self.add_btn.setIcon(qta.icon("ei.plus"))
+            self.add_btn.setIcon(qta.icon("ei.plus", color=DEFAULT_FONT["icon_color"]))
+            self.add_btn.icon_name = "ei.plus"
             self.remove_btn.setText("")
-            self.remove_btn.setIcon(qta.icon("ei.minus"))
+            self.remove_btn.setIcon(qta.icon("ei.minus", color=DEFAULT_FONT["icon_color"]))
+            self.remove_btn.icon_name = "ei.minus"
             self.sort_btn.setText("")
-            self.sort_btn.setIcon(qta.icon("fa5s.sort"))
+            self.sort_btn.setIcon(qta.icon("fa5s.sort", color=DEFAULT_FONT["icon_color"]))
+            self.sort_btn.icon_name = "fa5s.sort"
         else:
             self.add_btn.setIcon(QIcon())
             self.add_btn.setText("Dodaj uczestnika")
@@ -320,6 +323,11 @@ class InitiativeTracker(QWidget):
             self.remove_btn.setText("Usuń uczestnika")
             self.sort_btn.setIcon(QIcon())
             self.sort_btn.setText("Sortuj według inicjatywy")
+
+    def changeFontColor(self, icon_color):
+        if self.table.width() < self.BUTTONS_RESIZE_THRESHOLD:
+            for btn in [self.next_btn, self.add_btn, self.remove_btn, self.sort_btn]:
+                btn.setIcon(qta.icon(btn.icon_name, color=icon_color))
 
 
 def build() -> InitiativeTracker:

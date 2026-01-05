@@ -17,12 +17,13 @@ from PySide6.QtWidgets import (
 )
 import qtawesome as qta
 
-from tabs.battlemaps import build as build_battlemaps
+from narrion.tabs.battlemaps.battlemaps import build as build_battlemaps
 from tabs.calendar import build as build_calendar
 from tabs.dice.dice import build as build_dice
 from tabs.initiative import build as build_initiative
 from tabs.sessions import build as build_sessions
-from themes import THEMES
+from themes import DEFAULT_FONT, THEMES
+from widgets.color_wrapper import COLOR_LISTENERS
 
 
 class MainWindow(QMainWindow):
@@ -41,7 +42,7 @@ class MainWindow(QMainWindow):
         side_layout.setSpacing(0)
 
         self.buttons_info = [
-            ("Sesje RPG", "fa5s.book-open", 0),
+            ("Kampanie RPG", "fa5s.book-open", 0),
             ("Battlemapy", "fa5s.map", 1),
             ("Terminarz", "fa5s.calendar-alt", 2),
             ("Kości", "fa5s.dice-d20", "dice"),
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
 
         self.page_buttons = []
         for text, icon, idx in self.buttons_info:
-            btn = QPushButton(qta.icon(icon), text)
+            btn = QPushButton(qta.icon(icon, color=DEFAULT_FONT["icon_color"]), text)
             btn.icon_name = icon
             btn.setIconSize(QSize(24, 24))
             btn.setCheckable(True)
@@ -80,7 +81,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status)
         self.status.showMessage("Gotowe — UI mockup")
 
-        self.current_theme = "Pydracula Dark"
+        self.current_theme = DEFAULT_FONT["name"]
         self.apply_theme(self.current_theme)
 
         self.dark_switch = QCheckBox()
@@ -121,6 +122,8 @@ class MainWindow(QMainWindow):
             try:
                 path = theme_info["path"]
                 icon_color = theme_info["icon_color"]
+                DEFAULT_FONT["name"] = theme_name
+                DEFAULT_FONT["icon_color"] = icon_color
                 with open(path, "r", encoding="utf-8") as f:
                     style = f.read()
                 self.setStyleSheet(style)
@@ -128,6 +131,9 @@ class MainWindow(QMainWindow):
 
                 for btn in self.page_buttons:
                     btn.setIcon(qta.icon(btn.icon_name, color=icon_color))
+
+                for cls in COLOR_LISTENERS:
+                    cls.changeFontColor(icon_color)
             except FileNotFoundError:
                 print(f"Nie znaleziono pliku motywu: {path}")
         else:
