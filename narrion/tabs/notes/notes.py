@@ -259,9 +259,9 @@ class NoteEditorController:
                 btn.setIcon(qta.icon(btn.icon_name, color=icon_color))
 
 
-def build(current_session: str) -> QWidget:
+def build(current_session_dir: Path) -> QWidget:
     global NOTES_BASE_DIR
-    NOTES_BASE_DIR = Path("data/notes") / current_session
+    NOTES_BASE_DIR = current_session_dir / "notes"
     NOTES_BASE_DIR.mkdir(parents=True, exist_ok=True)
 
     w = QWidget()
