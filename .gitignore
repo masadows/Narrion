@@ -229,5 +229,6 @@ __marimo__/
 # vim
 *.swp
 *.swo
+token.pickle
 
 *models/onnx-clip
