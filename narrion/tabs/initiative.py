@@ -52,9 +52,11 @@ class CharacterSelectionDialog(QDialog):
     - Select from available campaigns
     - Choose between Player and NPC character types
     - Browse and select specific characters from the chosen campaign and type
+    - Add characters manually with name and initiative input
 
     Attributes:
         campaign_path (Path): Path to the currently selected campaign directory
+        manual_character_data (dict): Data for manually created character
         campaign_combo (QComboBox): Dropdown for campaign selection
         type_combo (QComboBox): Dropdown for character type selection
         character_list (QListWidget): List of available characters
@@ -68,6 +70,7 @@ class CharacterSelectionDialog(QDialog):
         """
         super().__init__(parent)
         self.campaign_path = None
+        self.manual_character_data = None  # Store manually created character data
 
         self.setWindowTitle("Wybierz postać")
         self.setModal(True)
@@ -78,16 +81,22 @@ class CharacterSelectionDialog(QDialog):
     def fallback_setup_ui(self):
         """Set up fallback UI when no campaigns are available.
 
-        Creates a simple dialog with a message about no available campaigns
-        and a Cancel button.
+        Creates a simple dialog with a message about no available campaigns,
+        a manual add button, and a Cancel button.
         """
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Brak dostępnych kampanii. Najpierw utwórz kampanię."))
+
+        # Manual add button
+        manual_add_button = QPushButton("Dodaj postać ręcznie")
+        manual_add_button.clicked.connect(self.add_manual_character)
+        layout.addWidget(manual_add_button)
+
         buttons = QDialogButtonBox(QDialogButtonBox.Cancel, Qt.Horizontal)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
         self.setLayout(layout)
-        self.resize(300, 100)
+        self.resize(300, 150)
 
     def setup_ui(self):
         """Set up the main UI components.
@@ -97,6 +106,7 @@ class CharacterSelectionDialog(QDialog):
         - Character type selection (Player/NPC) dropdown
         - Character list display
         - OK/Cancel buttons
+        - Manual add button
 
         Falls back to simple UI if no campaigns are found.
         """
@@ -126,7 +136,6 @@ class CharacterSelectionDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.addLayout(campaign_layout)
 
-        # Character type selection
         type_layout = QHBoxLayout()
         type_layout.addWidget(QLabel("Typ postaci:"))
 
@@ -137,13 +146,15 @@ class CharacterSelectionDialog(QDialog):
 
         layout.addLayout(type_layout)
 
-        # Character list
         layout.addWidget(QLabel("Wybierz postać:"))
         self.character_list = QListWidget()
         self.character_list.itemDoubleClicked.connect(self.accept)
         layout.addWidget(self.character_list)
 
-        # Dialog buttons
+        manual_add_button = QPushButton("Dodaj postać ręcznie")
+        manual_add_button.clicked.connect(self.add_manual_character)
+        layout.addWidget(manual_add_button)
+
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, Qt.Horizontal)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
@@ -198,6 +209,29 @@ class CharacterSelectionDialog(QDialog):
             except (json.JSONDecodeError, IOError):
                 # Skip invalid files
                 continue
+
+    def add_manual_character(self):
+        """Add a character manually by prompting for name and initiative."""
+        name, ok = QInputDialog.getText(self, "Dodaj uczestnika", "Nazwa postaci:")
+
+        if ok and name.strip():
+            # Get initiative range from InitiativeTracker constants
+            initiative, ok = QInputDialog.getInt(
+                self,
+                "Inicjatywa",
+                f"Inicjatywa dla {name}:",
+                value=10,
+                minValue=InitiativeTracker.INITIATIVE_RANGE[0],
+                maxValue=InitiativeTracker.INITIATIVE_RANGE[1],
+            )
+
+            if ok:
+                self.manual_character_data = {
+                    "name": name.strip(),
+                    "initiative": initiative,
+                    "status": InitiativeTracker.STATUSES[0],
+                }
+                self.accept()
 
     def get_selected_character_data(self) -> tuple[str, str]:
         """Get the selected character's name and type.
@@ -478,12 +512,35 @@ class InitiativeTracker(QWidget):
 
         Opens the character selection dialog, allows the user to choose
         a character of a selected type from available campaigns, prompts for initiative value,
-        and adds the character to the tracker. Prevents duplicate entries..
+        and adds the character to the tracker. Prevents duplicate entries.
+
+        Allows for manual character addition as well.
         """
 
         dialog = CharacterSelectionDialog(self)
 
         if dialog.exec() == QDialog.Accepted:
+            # Check if this is a manually added character
+            if dialog.manual_character_data:
+                manual_data = dialog.manual_character_data
+                char_table_name = manual_data["name"]
+
+                for row in range(self.table.rowCount()):
+                    if (
+                        self.table.item(row, 0)
+                        and self.table.item(row, 0).text() == char_table_name
+                    ):
+                        QMessageBox.information(
+                            self, "Info", f"Postać {char_table_name} już jest w trackerze."
+                        )
+                        return
+
+                self.add_character_data(
+                    char_table_name, manual_data["initiative"], manual_data["status"]
+                )
+                return
+
+            # Handle regular character selection
             char_name, char_type = dialog.get_selected_character_data()
 
             if not char_name or not char_type:
