@@ -104,10 +104,9 @@ class CharactersWidget(QWidget):
                 "type": self.char_type.name,
                 "short_description": "",
                 "description": "",
+                "image_path": None,
                 "stats_hp": "",
                 "stats_ac": "",
-                "stats_init": "",
-                "image_path": None,
             }
 
             try:
