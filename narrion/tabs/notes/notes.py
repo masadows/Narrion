@@ -44,6 +44,7 @@ NOTES_BASE_DIR = None
 
 @color
 class NotesTree(QTreeWidget):
+    '''Tree widget for displaying and managing notes and folders.'''
     def __init__(self):
         super().__init__()
         self.setHeaderHidden(True)
@@ -56,18 +57,21 @@ class NotesTree(QTreeWidget):
         self.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
 
     def dragEnterEvent(self, event: QDragEnterEvent):
+        '''Handle drag enter events for file drops.'''
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
         else:
             super().dragEnterEvent(event)
 
     def dragMoveEvent(self, event: QDragEnterEvent):
+        '''Handle drag move events for file drops.'''
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
         else:
             super().dragMoveEvent(event)
 
     def dropEvent(self, event: QDropEvent):
+        '''Handle drop events for file drops.'''
         if event.mimeData().hasUrls():
             target_folder = NOTES_BASE_DIR
             item = self.itemAt(event.position().toPoint())
@@ -90,6 +94,7 @@ class NotesTree(QTreeWidget):
             super().dropEvent(event)
 
     def changeFontColor(self, icon_color):
+        '''Update folder and file icons based on theme.'''
         if isValid(self):
             iterator = QTreeWidgetItemIterator(self)
             while iterator.value():
@@ -105,6 +110,7 @@ class NotesTree(QTreeWidget):
 
 @color
 class NoteEditorController:
+    '''Controller for the note editor, managing blocks and saving/loading notes.'''
     def __init__(self, container_layout):
         self.icon_buttons = list()
         self.scroll_area = QScrollArea()
@@ -132,6 +138,7 @@ class NoteEditorController:
         self.save_timer.timeout.connect(self.save_note)
 
     def create_block_btn(self, icon_name, tooltip, func):
+        '''Create a toolbar button for adding a block.'''
         btn = QPushButton()
         btn.clicked.connect(func)
         btn.setIcon(qta.icon(icon_name, color=DEFAULT_FONT["icon_color"]))
@@ -142,14 +149,17 @@ class NoteEditorController:
         self.toolbar_layout.addWidget(btn)
 
     def add_block_widget(self, block: BaseBlock):
+        '''Add a block widget to the editor.'''
         self.blocks_layout.addWidget(block)
         self.schedule_auto_save()
 
     def remove_block(self, block: BaseBlock):
+        '''Remove a block widget from the editor.'''
         block.deleteLater()
         self.schedule_auto_save()
 
     def move_block_up(self, block: BaseBlock):
+        '''Move a block widget up in the editor.'''
         idx = self.blocks_layout.indexOf(block)
         if idx > 0:
             self.blocks_layout.removeWidget(block)
@@ -158,6 +168,7 @@ class NoteEditorController:
             self.schedule_auto_save()
 
     def move_block_down(self, block: BaseBlock):
+        '''Move a block widget down in the editor.'''
         idx = self.blocks_layout.indexOf(block)
         if idx < self.blocks_layout.count() - 1:
             self.blocks_layout.removeWidget(block)
@@ -166,27 +177,34 @@ class NoteEditorController:
             self.schedule_auto_save()
 
     def add_text_block(self):
+        '''Add a text block to the editor.'''
         self.add_block_widget(TextBlock(self, self.remove_block))
 
     def add_image_block(self):
+        '''Add an image block to the editor.'''
         self.add_block_widget(ImageBlock(self, self.remove_block))
 
     def add_checklist_block(self):
+        '''Add a checklist block to the editor.'''
         self.add_block_widget(ChecklistBlock(self, self.remove_block))
 
     def add_table_block(self):
+        '''Add a table block to the editor.'''
         self.add_block_widget(TableBlock(self, self.remove_block))
 
     def add_timeline_block(self):
+        '''Add a timeline block to the editor.'''
         self.add_block_widget(TimelineBlock(self, self.remove_block))
 
     def clear_editor(self):
+        '''Clear all blocks from the editor.'''
         while self.blocks_layout.count():
             child = self.blocks_layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
     def show_placeholder(self, text):
+        '''Show a placeholder message in the editor.'''
         self.clear_editor()
         lbl = QLabel(text)
         lbl.setAlignment(Qt.AlignCenter)
@@ -194,6 +212,7 @@ class NoteEditorController:
         self.blocks_layout.addStretch()
 
     def load_note(self, path: Path):
+        '''Load a note from a file into the editor.'''
         self.current_file = path
         self.clear_editor()
         try:
@@ -232,10 +251,12 @@ class NoteEditorController:
             print(f"Błąd ładowania: {e}")
 
     def schedule_auto_save(self):
+        '''Schedule an automatic save of the note after a delay.'''
         if self.current_file:
             self.save_timer.start(1000)
 
     def save_note(self):
+        '''Save the current note to the file.'''
         if not self.current_file:
             return
 
@@ -254,12 +275,14 @@ class NoteEditorController:
             print(f"Błąd zapisu: {e}")
 
     def changeFontColor(self, icon_color):
+        '''Update toolbar button icons based on theme.'''
         for btn in self.icon_buttons:
             if isValid(btn):
                 btn.setIcon(qta.icon(btn.icon_name, color=icon_color))
 
 
 def build(current_session_dir: Path) -> QWidget:
+    '''Build the notes tab UI.'''
     global NOTES_BASE_DIR
     NOTES_BASE_DIR = current_session_dir / "notes"
     NOTES_BASE_DIR.mkdir(parents=True, exist_ok=True)
@@ -337,6 +360,7 @@ def build(current_session_dir: Path) -> QWidget:
 
 
 def open_note_handler(item: QTreeWidgetItem, controller: NoteEditorController):
+    '''Handle opening a note or folder from the tree.'''
     path = Path(item.data(0, 256))
 
     if path.is_dir():
@@ -354,6 +378,7 @@ def open_note_handler(item: QTreeWidgetItem, controller: NoteEditorController):
 
 
 def add_folder_items(parent_item: QTreeWidgetItem, folder_path: Path):
+    '''Recursively add folder items to the tree.'''
     for item in sorted(folder_path.iterdir()):
         display_name = item.stem if item.is_file() and item.suffix == ".json" else item.name
 
@@ -372,6 +397,7 @@ def add_folder_items(parent_item: QTreeWidgetItem, folder_path: Path):
 
 
 def refresh_tree(tree: QTreeWidget):
+    '''Refresh the notes tree to reflect the current file system state.'''
     tree.clear()
     for item in sorted(NOTES_BASE_DIR.iterdir()):
         display_name = item.stem if item.is_file() and item.suffix == ".json" else item.name
@@ -391,6 +417,7 @@ def refresh_tree(tree: QTreeWidget):
 
 
 def get_target_folder(tree: QTreeWidget) -> Path:
+    '''Get the target folder for new notes or folders based on the current selection.'''
     item = tree.currentItem()
     if item is None:
         return NOTES_BASE_DIR
@@ -399,6 +426,7 @@ def get_target_folder(tree: QTreeWidget) -> Path:
 
 
 def create_new_note(tree: QTreeWidget):
+    '''Create a new note in the selected folder.'''
     target_folder = get_target_folder(tree)
     name, ok = QInputDialog.getText(tree, "Nowa notatka", "Nazwa pliku (bez .json):")
     if ok and name.strip():
@@ -409,6 +437,7 @@ def create_new_note(tree: QTreeWidget):
 
 
 def create_new_folder(tree: QTreeWidget):
+    '''Create a new folder in the selected folder.'''
     target_folder = get_target_folder(tree)
     name, ok = QInputDialog.getText(tree, "Nowy folder", "Nazwa folderu:")
     if ok and name.strip():
@@ -418,6 +447,7 @@ def create_new_folder(tree: QTreeWidget):
 
 
 def delete_item(tree: QTreeWidget, controller: NoteEditorController):
+    '''Delete the selected note or folder from the tree.'''
     item = tree.currentItem()
     if item is None:
         return
@@ -446,13 +476,14 @@ def delete_item(tree: QTreeWidget, controller: NoteEditorController):
 
 
 def filter_notes(tree: QTreeWidget, text: str):
+    '''Filter notes in the tree based on the search text.'''
     text = text.lower()
     for i in range(tree.topLevelItemCount()):
         item = tree.topLevelItem(i)
         filter_tree_item(item, text)
 
-
 def filter_tree_item(item: QTreeWidgetItem, text: str) -> bool:
+    '''Recursively filter tree items based on the search text.'''
     visible = text in item.text(0).lower()
     for i in range(item.childCount()):
         child = item.child(i)

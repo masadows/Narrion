@@ -29,6 +29,7 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 
 def get_google_events(center_year, center_month):
+    '''Fetch events from Google Calendar for the month centered around'''
     creds = None
 
     if os.path.exists("token.pickle"):
@@ -88,6 +89,7 @@ def get_google_events(center_year, center_month):
     return filtered
 
 def add_google_event(title, date):
+    '''Add an event to Google Calendar'''
     creds = None
 
     if os.path.exists("token.pickle"):
@@ -117,6 +119,7 @@ def add_google_event(title, date):
     service.events().insert(calendarId="primary", body=event).execute()
 
 def delete_google_event(event_id):
+    '''Delete an event from Google Calendar by its ID'''
     creds = None
 
     if os.path.exists("token.pickle"):
@@ -143,6 +146,7 @@ def delete_google_event(event_id):
 
 
 class CalendarWidget(QCalendarWidget):
+    """Widget for displaying a calendar with highlighted event days."""
     def __init__(self, events, update_callback, fetch_callback):
         super().__init__()
         self.events = events
@@ -161,12 +165,14 @@ class CalendarWidget(QCalendarWidget):
         self.currentPageChanged.connect(self.on_month_changed)
 
     def clear_highlights(self):
+        '''Clear all highlighted days in the calendar.'''
         fmt = QTextCharFormat()
         for d in self._highlighted:
             self.setDateTextFormat(d, fmt)
         self._highlighted.clear()
 
     def mark_event_days(self):
+        '''Highlight days in the calendar that have events.'''
         self.clear_highlights()
         for event in self.events:
             start = event.get("start", {})
@@ -181,10 +187,12 @@ class CalendarWidget(QCalendarWidget):
                 self._highlighted.append(date)
 
     def on_month_changed(self, year, month):
+        '''Fetch events for the newly displayed month and update highlights.'''
         self.events = self.fetch_callback(year, month)
         self.mark_event_days()
 
     def on_date_clicked(self, date):
+        '''Update the event list based on the selected date.'''
         selected = []
 
         for event in self.events:
@@ -197,6 +205,7 @@ class CalendarWidget(QCalendarWidget):
         self.update_callback(selected)
 
 class AddEventDialog(QDialog):
+    """Dialog for adding a new event."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Dodaj wydarzenie")
@@ -220,6 +229,7 @@ class AddEventDialog(QDialog):
         layout.addWidget(buttons)
 
     def get_data(self):
+        '''Retrieve the entered event title and date.'''
         return (
             self.title_edit.text().strip(),
             self.date_edit.date().toPython(),
@@ -243,6 +253,7 @@ def build() -> QWidget:
     event_list = QListWidget()
 
     def update_event_details(ev_list):
+        '''Update the event list widget with events for the selected day.'''
         event_list.clear()
 
         if not ev_list:
@@ -260,6 +271,7 @@ def build() -> QWidget:
 
 
     def fetch_for_month(year, month):
+        '''Fetch events for the specified month.'''
         return get_google_events(year, month)
 
     cal = CalendarWidget(events, update_event_details, fetch_for_month)
@@ -273,6 +285,7 @@ def build() -> QWidget:
     right.addWidget(add_event_btn)
 
     def on_add_event():
+        '''Handle adding a new event.'''
         dlg = AddEventDialog(w)
         if dlg.exec() != QDialog.Accepted:
             return
@@ -300,6 +313,7 @@ def build() -> QWidget:
     right.addWidget(delete_event_btn)
 
     def on_delete_event():
+        '''Handle deleting the selected event.'''
         item = event_list.currentItem()
         if not item:
             return
