@@ -126,7 +126,7 @@ class CharactersWidget(QWidget):
 
     def add_character_to_list(self, name: str):
         self.char_list.addItem(name)
-        self.loaded_widgets[name] = CharacterWidget(self.campaign, name)
+        self.loaded_widgets[name] = CharacterWidget(self.campaign, name, self.char_type.name)
 
     def open_selected_character(self, item):
         if not item:
