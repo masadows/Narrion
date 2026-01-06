@@ -1,12 +1,18 @@
+import json
+from pathlib import Path
 from typing import List
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QComboBox,
+    QDialog,
+    QDialogButtonBox,
     QHBoxLayout,
     QHeaderView,
     QInputDialog,
+    QLabel,
+    QListWidget,
     QMessageBox,
     QPushButton,
     QSizePolicy,
@@ -22,6 +28,139 @@ import qtawesome as qta
 from themes import DEFAULT_FONT
 from widgets.color_wrapper import color
 from widgets.section_header import SectionHeader
+
+
+class CharacterSelectionDialog(QDialog):
+    """Dialog for selecting characters from the current campaign."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.campaign_path = None
+        
+        self.setWindowTitle("Wybierz postać")
+        self.setModal(True)
+        self.resize(400, 500)
+        
+        self.setup_ui()
+
+    def fallback_setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Brak dostępnych kampanii. Najpierw utwórz kampanię."))
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Cancel,
+            Qt.Horizontal
+        )
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+        self.setLayout(layout)
+        self.resize(300, 100)
+    
+    def setup_ui(self):
+
+        campaign_layout = QHBoxLayout()
+        campaign_layout.addWidget(QLabel("Kampania:"))
+        
+        campaigns_dir = Path("data/sessions")
+        campaigns = [p.name for p in campaigns_dir.iterdir() if p.is_dir()] if campaigns_dir.exists() else []
+
+        if not campaigns:
+            self.fallback_setup_ui()
+            return
+
+        self.campaign_combo = QComboBox()
+        self.campaign_combo.addItems(campaigns)
+        self.campaign_combo.currentTextChanged.connect(self.on_campaign_changed)
+        
+        if campaigns:
+            self.campaign_path = Path(f"data/sessions/{campaigns[0]}")
+        
+        campaign_layout.addWidget(self.campaign_combo)
+
+        layout = QVBoxLayout(self)
+        layout.addLayout(campaign_layout)
+        
+        # Character type selection
+        type_layout = QHBoxLayout()
+        type_layout.addWidget(QLabel("Typ postaci:"))
+        
+        self.type_combo = QComboBox()
+        self.type_combo.addItems(["Player", "NPC"])
+        self.type_combo.currentTextChanged.connect(self.load_characters)
+        type_layout.addWidget(self.type_combo)
+        
+        layout.addLayout(type_layout)
+        
+        # Character list
+        layout.addWidget(QLabel("Wybierz postać:"))
+        self.character_list = QListWidget()
+        self.character_list.itemDoubleClicked.connect(self.accept)
+        layout.addWidget(self.character_list)
+        
+        # Dialog buttons
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+            Qt.Horizontal
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        self.load_characters()
+
+    def on_campaign_changed(self, campaign_name):
+        """Handle campaign change."""
+        self.campaign_path = Path(f"data/sessions/{campaign_name}")
+        self.load_characters()
+    
+    def load_characters(self):
+        """Load characters of the selected type."""
+        if not self.campaign_path:
+            return
+        
+        self.character_list.clear()
+        
+        char_type = self.type_combo.currentText()
+        char_dir = self.campaign_path / "characters" / char_type
+        
+        if not char_dir.exists():
+            return
+        
+        for char_file in sorted(char_dir.glob("*.json")):
+            try:
+                with open(char_file, 'r', encoding='utf-8') as f:
+                    char_data = json.load(f)
+                
+                name = char_data.get('name', char_file.stem)
+                description = char_data.get('short_description', '')
+                
+                display_text = name
+                if description:
+                    display_text += f"\n{description}"
+                
+                self.character_list.addItem(display_text)
+                
+            except (json.JSONDecodeError, IOError):
+                # Skip invalid files
+                continue
+    
+    def get_selected_character_data(self):
+        """Get the selected character data."""
+        current_item = self.character_list.currentItem()
+        if not current_item:
+            return None, None, None
+
+        display_text = current_item.text()
+        char_name = display_text.split("\n")[0]
+        char_type = self.type_combo.currentText()
+        
+        char_file = self.campaign_path / "characters" / char_type / f"{char_name}.json"
+        
+        try:
+            with open(char_file, 'r', encoding='utf-8') as f:
+                char_data = json.load(f)
+            return char_name, char_type, char_data
+        except (json.JSONDecodeError, IOError):
+            return None, None, None
 
 
 class InitiativeItemDelegate(QStyledItemDelegate):
@@ -168,20 +307,34 @@ class InitiativeTracker(QWidget):
 
     def add_character(self):
         """Add a new character to the initiative tracker."""
-        name, ok = QInputDialog.getText(self, "Dodaj uczestnika", "Nazwa postaci:")
-
-        if ok and name.strip():
+        
+        dialog = CharacterSelectionDialog(self)
+        
+        if dialog.exec() == QDialog.Accepted:
+            char_name, char_type, char_data = dialog.get_selected_character_data()
+            
+            if not char_name or not char_data:
+                QMessageBox.warning(self, "Błąd", "Nie udało się załadować danych postaci.")
+                return
+            
+            for row in range(self.table.rowCount()):
+                if self.table.item(row, 0) and self.table.item(row, 0).text() == char_name:
+                    QMessageBox.information(self, "Info", f"Postać {char_name} już jest w trackerze.")
+                    return
+            
+            initiative_value = 10
+            
             initiative, ok = QInputDialog.getInt(
                 self,
                 "Inicjatywa",
-                f"Inicjatywa dla {name}:",
-                value=10,
+                f"Inicjatywa dla {char_name}:",
+                value=initiative_value,
                 minValue=self.INITIATIVE_RANGE[0],
                 maxValue=self.INITIATIVE_RANGE[1],
             )
-
+            
             if ok:
-                self.add_character_data(name.strip(), initiative, self.STATUSES[0])
+                self.add_character_data(char_name, initiative, self.STATUSES[0])
 
     def remove_character_data(self, row: int):
         """Remove character data from the table."""
@@ -237,7 +390,7 @@ class InitiativeTracker(QWidget):
     def get_character_status(self, row: int) -> str:
         """Get the status of the character at the specified row."""
         if row < 0 or row >= self.table.rowCount():
-            return self.STATUSES[3]
+            return self.STATUSES[2]  # "Martwy" - changed from [3] to [2]
         status_item = self.table.item(row, 2)
         return status_item.text() if status_item else self.STATUSES[0]
 
