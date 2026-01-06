@@ -199,10 +199,11 @@ class CharacterSelectionDialog(QDialog):
                 # Skip invalid files
                 continue
 
-    def get_selected_character_name(self) -> str:
-        """Get the selected character's name.
+    def get_selected_character_data(self) -> tuple[str, str]:
+        """Get the selected character's name and type.
 
         Returns:
+            str: Tuple of (character name, character type) or None if no selection
 
         """
         current_item = self.character_list.currentItem()
@@ -211,7 +212,8 @@ class CharacterSelectionDialog(QDialog):
 
         display_text = current_item.text()
         char_name = display_text.split("\n")[0]
-        return char_name
+        char_type = self.type_combo.currentText()
+        return char_name, char_type
 
 
 class InitiativeItemDelegate(QStyledItemDelegate):
@@ -482,16 +484,18 @@ class InitiativeTracker(QWidget):
         dialog = CharacterSelectionDialog(self)
 
         if dialog.exec() == QDialog.Accepted:
-            char_name = dialog.get_selected_character_name()
+            char_name, char_type = dialog.get_selected_character_data()
 
-            if not char_name:
+            if not char_name or not char_type:
                 QMessageBox.warning(self, "Błąd", "Nie udało się załadować danych postaci.")
                 return
 
+            char_table_name = f"{char_name} ({char_type})"
+
             for row in range(self.table.rowCount()):
-                if self.table.item(row, 0) and self.table.item(row, 0).text() == char_name:
+                if self.table.item(row, 0) and self.table.item(row, 0).text() == char_table_name:
                     QMessageBox.information(
-                        self, "Info", f"Postać {char_name} już jest w trackerze."
+                        self, "Info", f"Postać {char_table_name} już jest w trackerze."
                     )
                     return
 
@@ -500,14 +504,14 @@ class InitiativeTracker(QWidget):
             initiative, ok = QInputDialog.getInt(
                 self,
                 "Inicjatywa",
-                f"Inicjatywa dla {char_name}:",
+                f"Inicjatywa dla {char_table_name}:",
                 value=initiative_value,
                 minValue=self.INITIATIVE_RANGE[0],
                 maxValue=self.INITIATIVE_RANGE[1],
             )
 
             if ok:
-                self.add_character_data(char_name, initiative, self.STATUSES[0])
+                self.add_character_data(char_table_name, initiative, self.STATUSES[0])
 
     def remove_character_data(self, row: int):
         """Remove a character from the initiative table.
