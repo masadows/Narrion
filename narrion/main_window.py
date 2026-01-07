@@ -1,3 +1,4 @@
+import os
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -14,6 +15,7 @@ from PySide6.QtWidgets import (
     QToolBar,
     QVBoxLayout,
     QWidget,
+    QMessageBox
 )
 import qtawesome as qta
 
@@ -169,9 +171,26 @@ class MainWindow(QMainWindow):
             self.page_buttons[4].setChecked(True)
             return
 
+        if index == 2:
+            if not os.path.exists("./data/credentials.json"):
+                self._show_calendar_credentials_missing()
+                return
+
         if isinstance(index, int):
             self.stack.setCurrentIndex(index)
             self.page_buttons[index].setChecked(True)
+
+    def _show_calendar_credentials_missing(self):
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("Brak konfiguracji kalendarza")
+        msg.setText(
+            "Nie znaleziono pliku credentials.json.\n"
+            "Aby korzystać z kalendarza, skonfiguruj integrację i "
+            "umieść plik w:\n./data/credentials.json\n"
+        )
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
