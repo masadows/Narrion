@@ -37,3 +37,7 @@ To run tests use command:
 ```bash
 make test
 ```
+
+## Application using
+### Creating campaing
+To create campaign you need to enter "Kampanie RPG"
