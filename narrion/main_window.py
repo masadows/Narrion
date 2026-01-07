@@ -181,6 +181,7 @@ class MainWindow(QMainWindow):
             self.page_buttons[index].setChecked(True)
 
     def _show_calendar_credentials_missing(self):
+        '''Show information about missing credentials'''
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Warning)
         msg.setWindowTitle("Brak konfiguracji kalendarza")
