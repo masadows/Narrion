@@ -72,7 +72,8 @@ class MainWindow(QMainWindow):
         self.pages = [
             build_sessions(),
             build_battlemaps(),
-            build_calendar(),
+            # build_calendar(),
+            QWidget(),
         ]
         for page in self.pages:
             self.stack.addWidget(page)
@@ -175,6 +176,12 @@ class MainWindow(QMainWindow):
             if not os.path.exists("./data/credentials.json"):
                 self._show_calendar_credentials_missing()
                 return
+
+            if not hasattr(self, "_calendar_loaded"):
+                calendar_page = build_calendar()
+                self.stack.removeWidget(self.stack.widget(2))
+                self.stack.insertWidget(2, calendar_page)
+                self._calendar_loaded = True
 
         if isinstance(index, int):
             self.stack.setCurrentIndex(index)
