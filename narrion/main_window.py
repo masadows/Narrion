@@ -26,11 +26,15 @@ from tabs.initiative import build as build_initiative
 from tabs.sessions import build as build_sessions
 from themes import DEFAULT_FONT, THEMES
 from widgets.color_wrapper import COLOR_LISTENERS
+import json
+import shutil
+from pathlib import Path
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.load_settings()
         self.setWindowTitle("RPG Master Assistant")
         self.setWindowIcon(QIcon.fromTheme("applications-games"))
 
@@ -72,7 +76,6 @@ class MainWindow(QMainWindow):
         self.pages = [
             build_sessions(),
             build_battlemaps(),
-            # build_calendar(),
             QWidget(),
         ]
         for page in self.pages:
@@ -84,7 +87,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status)
         self.status.showMessage("Gotowe — UI mockup")
 
-        self.current_theme = DEFAULT_FONT["name"]
+        self.current_theme = self.settings.get("theme")
         self.apply_theme(self.current_theme)
 
         self.dark_switch = QCheckBox()
@@ -98,6 +101,19 @@ class MainWindow(QMainWindow):
         self.dice_dock = None
 
         self.switch_page(0)
+
+    def load_settings(self):
+        settings_path = Path("./data/settings.json")
+        basic_path = Path("./data/default_settings.json")
+        if not settings_path.exists():
+            shutil.copy(basic_path, settings_path)
+
+        with open(settings_path, "r") as file:
+            self.settings = json.load(file)
+
+    def save_settings(self):
+        with open("./data/settings.json", "w") as file:
+            json.dump(self.settings, file, indent=4)
 
     def _create_toolbar(self) -> QToolBar:
         tb = QToolBar("Główne")
@@ -137,6 +153,8 @@ class MainWindow(QMainWindow):
 
                 for cls in COLOR_LISTENERS:
                     cls.changeFontColor(icon_color)
+                self.settings['theme'] = theme_name
+                self.save_settings()
             except FileNotFoundError:
                 print(f"Nie znaleziono pliku motywu: {path}")
         else:

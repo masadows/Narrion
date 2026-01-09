@@ -1,5 +1,6 @@
 import os
 import pickle
+import json
 
 import numpy as np
 from PySide6.QtCore import Qt, QUrl
@@ -33,6 +34,7 @@ from .model_logic import ModelLogic
 class BattlemapsWidget(QWidget):
     def __init__(self):
         super().__init__()
+        self.load_settings()
 
         self.logic = None
         self.cache_data = {}
@@ -54,6 +56,14 @@ class BattlemapsWidget(QWidget):
 
         self.load_favorites()
         self.init_ui()
+
+    def load_settings(self):
+        with open("./data/settings.json", "r") as file:
+            self.settings = json.load(file)
+
+    def save_settings(self):
+        with open("./data/settings.json", "w") as file:
+            json.dump(self.settings, file, indent=4)
 
     def ensure_model_loaded(self):
         if self.logic is not None:
@@ -149,7 +159,8 @@ class BattlemapsWidget(QWidget):
         search_h.addWidget(QLabel("Ile wyników:"))
         self.spin_limit = QSpinBox()
         self.spin_limit.setRange(1, 100)
-        self.spin_limit.setValue(5)
+        self.spin_limit.setValue(self.settings.get("spin_limit"))
+        self.spin_limit.valueChanged.connect(self.on_spin_limit_changed)
         self.spin_limit.setToolTip("Ile najlepiej dopasowanych obrazków pokazać?")
         search_h.addWidget(self.spin_limit)
 
@@ -158,6 +169,7 @@ class BattlemapsWidget(QWidget):
         self.btn_search.clicked.connect(self.perform_search)
         search_h.addWidget(self.btn_search)
         v.addLayout(search_h)
+        self.scan_folder(first_open=True)
 
     def load_favorites(self):
         if os.path.exists("data/favorites.pkl"):
@@ -166,6 +178,10 @@ class BattlemapsWidget(QWidget):
                     self.favorites = pickle.load(f)
             except Exception:
                 self.favorites = set()
+
+    def on_spin_limit_changed(self, value):
+        self.settings["spin_limit"] = value
+        self.save_settings()
 
     def save_favorites(self):
         try:
@@ -245,13 +261,19 @@ class BattlemapsWidget(QWidget):
         else:
             self.map_list.clear()
 
-    def scan_folder(self):
+    def scan_folder(self, first_open = False):
         if not self.ensure_model_loaded():
             return
-
-        folder = QFileDialog.getExistingDirectory(self, "Wybierz folder z mapami")
+        
+        if first_open:
+            folder = self.settings.get("image_path")
+        else:
+            folder = QFileDialog.getExistingDirectory(self, "Wybierz folder z mapami")
         if not folder:
             return
+        
+        self.settings["image_path"] = folder
+        self.save_settings()
 
         self.current_folder = folder
 
@@ -304,13 +326,13 @@ class BattlemapsWidget(QWidget):
                 self.btn_scan.setEnabled(True)
 
         self.rebuild_search_index()
-
-        QMessageBox.information(
-            self,
-            "Gotowe",
-            f"Baza gotowa.\nRazem map: {len(self.cache_data)}\n"
-            f"(Nowych: {len(new_files)}, Usuniętych: {len(deleted_files)})",
-        )
+        if not first_open:
+            QMessageBox.information(
+                self,
+                "Gotowe",
+                f"Baza gotowa.\nRazem map: {len(self.cache_data)}\n"
+                f"(Nowych: {len(new_files)}, Usuniętych: {len(deleted_files)})",
+            )
 
     def rebuild_search_index(self):
         self.map_list.clear()

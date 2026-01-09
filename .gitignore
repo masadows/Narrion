@@ -221,7 +221,8 @@ marimo/_lsp/
 __marimo__/
 
 # Data
-/data/
+/data/*
+!/data/default_settings.json
 
 # Mac OS-specific storage files
 .DS_Store
