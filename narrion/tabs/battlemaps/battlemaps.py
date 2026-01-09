@@ -1,3 +1,14 @@
+"""Battlemap Browser and Semantic Search GUI.
+
+This module implements the main graphical interface for managing, indexing,
+and searching RPG battlemaps. It acts as the frontend for the CLIP-based
+semantic search engine, allowing users to:
+- Scan directories for image files.
+- Index images using the neural network (lazy-loaded).
+- Perform text-to-image semantic searches (e.g., "snowy mountain").
+- Manage a list of favorite maps.
+"""
+
 import os
 import pickle
 import json
@@ -32,7 +43,23 @@ from .model_logic import ModelLogic
 
 @color
 class BattlemapsWidget(QWidget):
+    """Main widget for browsing and searching battlemaps.
+
+    This class integrates the UI with the backend logic (`ModelLogic`).
+    It handles file system operations, caching of vector embeddings,
+    and the visual presentation of search results.
+
+    Attributes:
+        logic (ModelLogic | None): Instance of the AI logic handler. None until initialized.
+        cache_data (dict): Dictionary mapping filenames to numpy embedding vectors.
+        favorites (set): Set of file paths marked as favorites.
+        current_folder (str | None): Path to the currently opened directory.
+        image_paths (list): Parallel list to embeddings, storing full file paths.
+        embeddings_np (np.ndarray | None): Matrix of all image embeddings for fast search.
+    """
+
     def __init__(self):
+        """Initialize the battlemap widget and load persistent data."""
         super().__init__()
         self.load_settings()
 
@@ -52,8 +79,6 @@ class BattlemapsWidget(QWidget):
         self.icon_reset = qta.icon("fa5s.times", color=DEFAULT_FONT["icon_color"])
         self.icon_file = qta.icon("fa5s.image", color=DEFAULT_FONT["icon_color"])
 
-        self.logic = None
-
         self.load_favorites()
         self.init_ui()
 
@@ -65,7 +90,17 @@ class BattlemapsWidget(QWidget):
         with open("./data/settings.json", "w") as file:
             json.dump(self.settings, file, indent=4)
 
-    def ensure_model_loaded(self):
+    def ensure_model_loaded(self) -> bool:
+        """Lazy load the AI model logic.
+
+        Checks if the model is already loaded. If not, attempts to initialize
+        `ModelLogic`, which triggers ONNX session creation. Shows a wait cursor
+        during loading.
+
+        Returns:
+            bool: True if model is loaded successfully (or was already loaded),
+                False if initialization failed.
+        """
         if self.logic is not None:
             return True
 
@@ -81,6 +116,7 @@ class BattlemapsWidget(QWidget):
             QGuiApplication.restoreOverrideCursor()
 
     def init_ui(self):
+        """Set up the user interface layout and signals."""
         v = QVBoxLayout(self)
         v.setContentsMargins(4, 4, 4, 4)
 
@@ -172,6 +208,7 @@ class BattlemapsWidget(QWidget):
         self.scan_folder(first_open=True)
 
     def load_favorites(self):
+        """Load favorites set from a pickle file."""
         if os.path.exists("data/favorites.pkl"):
             try:
                 with open("data/favorites.pkl", "rb") as f:
@@ -184,6 +221,7 @@ class BattlemapsWidget(QWidget):
         self.save_settings()
 
     def save_favorites(self):
+        """Save current favorites set to a pickle file."""
         try:
             with open("data/favorites.pkl", "wb") as f:
                 pickle.dump(self.favorites, f)
@@ -191,6 +229,11 @@ class BattlemapsWidget(QWidget):
             print(f"Błąd zapisu ulubionych: {e}")
 
     def toggle_current_favorite(self):
+        """Toggle the favorite status of the currently selected map.
+
+        Updates the internal set, saves to disk, and refreshes the UI button state.
+        If in 'Show Only Favorites' mode, removing an item removes it from the list.
+        """
         item = self.map_list.currentItem()
         if not item:
             return
@@ -216,6 +259,7 @@ class BattlemapsWidget(QWidget):
         self.update_list_item_appearance(item)
 
     def toggle_list_view(self):
+        """Switch between showing all maps and showing only favorites."""
         if self.btn_show_favs.isChecked():
             self.show_only_favorites()
             self.btn_show_favs.setText("Pokaż wszystkie")
@@ -224,6 +268,7 @@ class BattlemapsWidget(QWidget):
             self.btn_show_favs.setText("Tylko ulubione")
 
     def show_only_favorites(self):
+        """Filter the list widget to display only favorite items."""
         self.map_list.clear()
         if not self.favorites:
             self.map_list.addItem("(Brak ulubionych)")
@@ -240,6 +285,7 @@ class BattlemapsWidget(QWidget):
                 pass
 
     def open_file_location(self):
+        """Open the OS file explorer at the selected map's location."""
         item = self.map_list.currentItem()
         if not item:
             return
@@ -252,6 +298,7 @@ class BattlemapsWidget(QWidget):
             QMessageBox.warning(self, "Błąd", "Plik nie istnieje lub ścieżka jest błędna.")
 
     def reset_view(self):
+        """Reset search filters and show all maps from the current folder."""
         self.search_input.clear()
         self.btn_show_favs.setChecked(False)
         self.btn_show_favs.setText("Tylko ulubione")
@@ -262,6 +309,7 @@ class BattlemapsWidget(QWidget):
             self.map_list.clear()
 
     def scan_folder(self, first_open = False):
+        """Open a directory dialog and scan for images to index."""
         if not self.ensure_model_loaded():
             return
         
@@ -335,6 +383,11 @@ class BattlemapsWidget(QWidget):
             )
 
     def rebuild_search_index(self):
+        """Prepare internal data structures for search and populate the UI list.
+
+        Flattens the `cache_data` dictionary into `self.embeddings_np` (numpy array)
+        for vectorized operations and populates the QListWidget with all maps.
+        """
         self.map_list.clear()
         self.image_paths = []
         embeddings_list = []
@@ -362,6 +415,12 @@ class BattlemapsWidget(QWidget):
             self.embeddings_np = np.vstack(embeddings_list)
 
     def perform_search(self):
+        """Execute semantic search based on text input.
+
+        Computes the dot product (cosine similarity) between the text embedding
+        of the query and the pre-computed image embeddings. Sorts results
+        by score and updates the list widget to show the top matches.
+        """
         query = self.search_input.text()
         if not query or self.embeddings_np is None or self.embeddings_np is None:
             return
@@ -404,7 +463,16 @@ class BattlemapsWidget(QWidget):
         except Exception as e:
             print(f"Błąd szukania: {e}")
 
-    def update_preview(self, current_item, previous_item):
+    def update_preview(self, current_item: QListWidgetItem, previous_item: QListWidgetItem):
+        """Handle selection changes in the list widget.
+
+        Updates the `ScalableImageLabel` with the selected image and updates
+        action buttons (Favorite/Open Location) based on the selection.
+
+        Args:
+            current_item (QListWidgetItem): The newly selected item.
+            previous_item (QListWidgetItem): The previously selected item (unused).
+        """
         if not current_item:
             self.btn_favorite_action.setEnabled(False)
             self.btn_open_loc.setEnabled(False)
@@ -432,7 +500,12 @@ class BattlemapsWidget(QWidget):
                 self.btn_favorite_action.setText("Dodaj do ulubionych")
                 self.btn_favorite_action.setIcon(self.icon_star_outline)
 
-    def update_list_item_appearance(self, item):
+    def update_list_item_appearance(self, item: QListWidgetItem):
+        """Refresh the icon of a specific list item based on favorite status.
+
+        Args:
+            item (QListWidgetItem): The item to update.
+        """
         path = item.data(Qt.UserRole)
         is_fav = path in self.favorites
 
@@ -441,7 +514,12 @@ class BattlemapsWidget(QWidget):
         else:
             item.setIcon(self.icon_file)
 
-    def changeFontColor(self, icon_color):
+    def changeFontColor(self, icon_color: str):
+        """Theme change callback to update icon colors.
+
+        Args:
+            icon_color (str): Hex code or name of the new color.
+        """
         if isValid(self):
             self.icon_star_solid = qta.icon("fa5s.star", color=icon_color)
             self.icon_star_outline = qta.icon("fa6.star", color=icon_color)
@@ -473,4 +551,9 @@ class BattlemapsWidget(QWidget):
 
 
 def build() -> QWidget:
+    """Factory function to create the BattlemapsWidget.
+
+    Returns:
+        QWidget: A new instance of BattlemapsWidget.
+    """
     return BattlemapsWidget()

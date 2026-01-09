@@ -1,3 +1,16 @@
+"""Character Sheet Viewer and Editor Module.
+
+This module provides a widget for displaying and editing RPG character details.
+It combines a structured form for statistics (HP, AC) with text editor
+for descriptions and a visual viewer that supports both standard images and
+PDF character sheets (rendered as images).
+
+The module handles:
+- JSON serialization of character data.
+- Dynamic loading and rendering of PDF documents.
+- Automatic scaling of visual assets.
+"""
+
 import json
 from pathlib import Path
 
@@ -26,7 +39,29 @@ from widgets.section_header import SectionHeader
 
 @color
 class CharacterWidget(QWidget):
-    def __init__(self, campaign, name, char_type="Player"):
+    """Widget representing a single character sheet.
+
+    It manages the interface for viewing and editing character data, including
+    stats, descriptions, and the character sheet image/PDF. Data is persisted
+    automatically to a JSON file specific to the campaign and character type.
+
+    Attributes:
+        name (str): The name of the character.
+        char_type (str): Type of character ('Player' or 'NPC').
+        file_path (Path): Absolute path to the character's JSON data file.
+        current_image_path (str | None): Path to the currently loaded image/PDF.
+        pdf_doc (QPdfDocument | None): Reference to the loaded PDF document, if any.
+        original_pixmap (QPixmap | None): The full-resolution rendered character sheet.
+    """
+
+    def __init__(self, campaign: str, name: str, char_type: str = "Player"):
+        """Initialize the character widget.
+
+        Args:
+            campaign (str): The name of the active campaign.
+            name (str): The character's name.
+            char_type (str): 'Player' or 'NPC', defaults to 'Player'.
+        """
         super().__init__()
         self.name = name
         self.char_type = char_type
@@ -98,6 +133,11 @@ class CharacterWidget(QWidget):
         self.load_data()
 
     def load_data(self):
+        """Load character state from the associated JSON file.
+
+        Populates UI fields (HP, AC, description) and loads the character sheet
+        image if a path is saved. Handles file system errors gracefully.
+        """
         if not self.file_path.exists():
             return
 
@@ -127,6 +167,11 @@ class CharacterWidget(QWidget):
             print(f"Błąd ładowania postaci {self.name}: {e}")
 
     def save_data(self):
+        """Persist current UI state to the JSON file.
+
+        Creates the directory structure if it doesn't exist. Triggered automatically
+        when fields lose focus or text changes.
+        """
         data = {
             "name": self.name,
             "type": self.char_type,
@@ -146,6 +191,7 @@ class CharacterWidget(QWidget):
             print(f"Błąd zapisu postaci {self.name}: {e}")
 
     def adjustTextEditHeight(self):
+        """Dynamically resize the text editor to fit its content."""
         te = self.text_edit
         doc_height = te.document().size().height()
         margins = te.contentsMargins().top() + te.contentsMargins().bottom()
@@ -153,6 +199,7 @@ class CharacterWidget(QWidget):
         te.setFixedHeight(height)
 
     def changePlayerFile(self):
+        """Open a file dialog to select a new character sheet (Image or PDF)."""
         path_file, _ = QFileDialog.getOpenFileName(
             self,
             "Wybierz kartę postaci",
@@ -167,13 +214,26 @@ class CharacterWidget(QWidget):
 
         self.save_data()
 
-    def load_visual_from_path(self, path):
+    def load_visual_from_path(self, path: str):
+        """Dispatch loading logic based on file extension.
+
+        Args:
+            path (str): File path to the asset.
+        """
         if path.lower().endswith(".pdf"):
             self.loadPdfAsPixmap(path)
         else:
             self.loadImage(path)
 
-    def loadPdfAsPixmap(self, path):
+    def loadPdfAsPixmap(self, path: str):
+        """Render a multipage PDF into a single vertical pixmap.
+
+        Iterates through all pages of the PDF, renders them as images,
+        and stitches them together vertically into one continuous scrollable image.
+
+        Args:
+            path (str): Path to the PDF file.
+        """
         self.pdf_doc = QPdfDocument(self)
         try:
             self.pdf_doc.load(path)
@@ -215,7 +275,12 @@ class CharacterWidget(QWidget):
         self.updateImageSize()
         self.image_label.show()
 
-    def loadImage(self, path):
+    def loadImage(self, path: str):
+        """Load a standard image file into the viewer.
+
+        Args:
+            path (str): Path to the image file.
+        """
         self.original_pixmap = QPixmap(path)
         if self.original_pixmap.isNull():
             return
@@ -225,6 +290,7 @@ class CharacterWidget(QWidget):
         self.pdf_doc = None
 
     def updateImageSize(self):
+        """Scale the loaded image to fit the current widget width."""
         if self.original_pixmap is None or self.original_pixmap.isNull():
             self.image_label.hide()
             return
@@ -233,9 +299,11 @@ class CharacterWidget(QWidget):
         self.image_label.show()
 
     def resizeEvent(self, event):
+        """Handle widget resize events to adjust image scaling."""
         super().resizeEvent(event)
         self.updateImageSize()
 
-    def changeFontColor(self, icon_color):
+    def changeFontColor(self, icon_color: str):
+        """Update the file change button icon color on theme change."""
         if isValid(self.change_btn):
             self.change_btn.setIcon(qta.icon("mdi.file-account", color=icon_color))

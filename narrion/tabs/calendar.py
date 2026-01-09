@@ -1,35 +1,33 @@
-from PySide6.QtCore import Qt, QDate
-from PySide6.QtGui import QTextCharFormat, QColor
-from PySide6.QtWidgets import (
-    QCalendarWidget,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QSplitter,
-    QVBoxLayout,
-    QWidget,
-    QListWidget,
-    QListWidgetItem,
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QDateEdit
-)
-
 import datetime
 import os
 import pickle
 
-from googleapiclient.discovery import build as google_build
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build as google_build
+from PySide6.QtCore import QDate, Qt
+from PySide6.QtGui import QColor, QTextCharFormat
+from PySide6.QtWidgets import (
+    QCalendarWidget,
+    QDateEdit,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QPushButton,
+    QSplitter,
+    QVBoxLayout,
+    QWidget,
+)
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 
 def get_google_events(center_year, center_month):
-    '''Fetch events from Google Calendar for the month centered around'''
+    """Fetch events from Google Calendar for the month centered around"""
     creds = None
 
     if os.path.exists("token.pickle"):
@@ -40,9 +38,7 @@ def get_google_events(center_year, center_month):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "./data/credentials.json", SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file("./data/credentials.json", SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open("token.pickle", "wb") as token:
@@ -88,8 +84,9 @@ def get_google_events(center_year, center_month):
 
     return filtered
 
+
 def add_google_event(title, date):
-    '''Add an event to Google Calendar'''
+    """Add an event to Google Calendar"""
     creds = None
 
     if os.path.exists("token.pickle"):
@@ -100,9 +97,7 @@ def add_google_event(title, date):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json", SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open("token.pickle", "wb") as token:
@@ -118,8 +113,9 @@ def add_google_event(title, date):
 
     service.events().insert(calendarId="primary", body=event).execute()
 
+
 def delete_google_event(event_id):
-    '''Delete an event from Google Calendar by its ID'''
+    """Delete an event from Google Calendar by its ID"""
     creds = None
 
     if os.path.exists("token.pickle"):
@@ -130,23 +126,19 @@ def delete_google_event(event_id):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json", SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open("token.pickle", "wb") as token:
             pickle.dump(creds, token)
 
     service = google_build("calendar", "v3", credentials=creds)
-    service.events().delete(
-        calendarId="primary",
-        eventId=event_id
-    ).execute()
+    service.events().delete(calendarId="primary", eventId=event_id).execute()
 
 
 class CalendarWidget(QCalendarWidget):
     """Widget for displaying a calendar with highlighted event days."""
+
     def __init__(self, events, update_callback, fetch_callback):
         super().__init__()
         self.events = events
@@ -165,14 +157,14 @@ class CalendarWidget(QCalendarWidget):
         self.currentPageChanged.connect(self.on_month_changed)
 
     def clear_highlights(self):
-        '''Clear all highlighted days in the calendar.'''
+        """Clear all highlighted days in the calendar."""
         fmt = QTextCharFormat()
         for d in self._highlighted:
             self.setDateTextFormat(d, fmt)
         self._highlighted.clear()
 
     def mark_event_days(self):
-        '''Highlight days in the calendar that have events.'''
+        """Highlight days in the calendar that have events."""
         self.clear_highlights()
         for event in self.events:
             start = event.get("start", {})
@@ -187,12 +179,12 @@ class CalendarWidget(QCalendarWidget):
                 self._highlighted.append(date)
 
     def on_month_changed(self, year, month):
-        '''Fetch events for the newly displayed month and update highlights.'''
+        """Fetch events for the newly displayed month and update highlights."""
         self.events = self.fetch_callback(year, month)
         self.mark_event_days()
 
     def on_date_clicked(self, date):
-        '''Update the event list based on the selected date.'''
+        """Update the event list based on the selected date."""
         selected = []
 
         for event in self.events:
@@ -204,8 +196,10 @@ class CalendarWidget(QCalendarWidget):
 
         self.update_callback(selected)
 
+
 class AddEventDialog(QDialog):
     """Dialog for adding a new event."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Dodaj wydarzenie")
@@ -220,16 +214,14 @@ class AddEventDialog(QDialog):
         layout.addRow("Tytuł:", self.title_edit)
         layout.addRow("Data:", self.date_edit)
 
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        )
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
         layout.addWidget(buttons)
 
     def get_data(self):
-        '''Retrieve the entered event title and date.'''
+        """Retrieve the entered event title and date."""
         return (
             self.title_edit.text().strip(),
             self.date_edit.date().toPython(),
@@ -253,7 +245,7 @@ def build() -> QWidget:
     event_list = QListWidget()
 
     def update_event_details(ev_list):
-        '''Update the event list widget with events for the selected day.'''
+        """Update the event list widget with events for the selected day."""
         event_list.clear()
 
         if not ev_list:
@@ -269,9 +261,8 @@ def build() -> QWidget:
             item.setData(Qt.UserRole, ev)
             event_list.addItem(item)
 
-
     def fetch_for_month(year, month):
-        '''Fetch events for the specified month.'''
+        """Fetch events for the specified month."""
         return get_google_events(year, month)
 
     cal = CalendarWidget(events, update_event_details, fetch_for_month)
@@ -285,7 +276,7 @@ def build() -> QWidget:
     right.addWidget(add_event_btn)
 
     def on_add_event():
-        '''Handle adding a new event.'''
+        """Handle adding a new event."""
         dlg = AddEventDialog(w)
         if dlg.exec() != QDialog.Accepted:
             return
@@ -301,10 +292,11 @@ def build() -> QWidget:
 
         current_date = cal.selectedDate()
         daily = [
-            e for e in cal.events
-            if (e.get("start", {}).get("date") or e.get("start", {}).get("dateTime", "")).startswith(
-                current_date.toString("yyyy-MM-dd")
-            )
+            e
+            for e in cal.events
+            if (
+                e.get("start", {}).get("date") or e.get("start", {}).get("dateTime", "")
+            ).startswith(current_date.toString("yyyy-MM-dd"))
         ]
         update_event_details(daily)
 
@@ -313,7 +305,7 @@ def build() -> QWidget:
     right.addWidget(delete_event_btn)
 
     def on_delete_event():
-        '''Handle deleting the selected event.'''
+        """Handle deleting the selected event."""
         item = event_list.currentItem()
         if not item:
             return
@@ -336,13 +328,13 @@ def build() -> QWidget:
 
         current_date = cal.selectedDate()
         remaining = [
-            e for e in cal.events
-            if (e.get("start", {}).get("date") or e.get("start", {}).get("dateTime", "")).startswith(
-                current_date.toString("yyyy-MM-dd")
-            )
+            e
+            for e in cal.events
+            if (
+                e.get("start", {}).get("date") or e.get("start", {}).get("dateTime", "")
+            ).startswith(current_date.toString("yyyy-MM-dd"))
         ]
         update_event_details(remaining)
-
 
     delete_event_btn.clicked.connect(on_delete_event)
 

@@ -1,4 +1,15 @@
-# tabs/sessions.py
+"""Campaign Session Management Module.
+
+This module provides the top-level interface for managing RPG campaigns (sessions).
+It functions as a navigation controller that switches between two main views:
+1. **Session List (Dashboard):** A grid/list view of all available campaigns.
+2. **Session Detail (Workspace):** A tabbed interface for a specific campaign,
+   integrating Notes, Character sheets, and NPC databases.
+
+The module handles the directory structure creation for new campaigns and
+cleans up resources when campaigns are deleted.
+"""
+
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -21,9 +32,24 @@ from tabs.characters import build as build_characters
 
 
 class SessionsTab(QWidget):
+    """Main widget for campaign management.
+
+    This widget manages the application state related to the active campaign.
+    It does not use a `QStackedWidget` for navigation; instead, it dynamically
+    rebuilds its own layout (`_clear_layout`) to switch between the selection
+    screen and the campaign workspace.
+
+    Attributes:
+        SESSIONS_DIR (Path): Constant path to the root data directory ("data/sessions").
+        sessions (list[str]): List of currently detected campaign directory names.
+        current_session (str | None): Name of the currently active campaign, or None if in list view.
+        layout (QVBoxLayout): The main layout container manipulated to change views.
+    """
+
     SESSIONS_DIR = Path("data/sessions")
 
     def __init__(self):
+        """Initialize the session manager and load existing campaigns."""
         super().__init__()
 
         self.sessions = []
@@ -35,12 +61,21 @@ class SessionsTab(QWidget):
         self._build_session_list_ui()
 
     def _load_sessions(self):
-        """Loads the list of existing sessions from the data/sessions directory"""
+        """Scan the data directory for existing campaign folders.
+
+        Ensures the base directory exists and populates `self.sessions`
+        with the names of subdirectories found.
+        """
         self.SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
         self.sessions = [p.name for p in self.SESSIONS_DIR.iterdir() if p.is_dir()]
 
     def _build_session_list_ui(self):
-        """Ekran startowy z listą sesji"""
+        """Render the Dashboard view (List of Campaigns).
+
+        Clears the current layout and builds the initial screen containing:
+        - A list widget displaying available sessions.
+        - Buttons to create a new campaign or delete an existing one.
+        """
         self._clear_layout()
         self.current_session = None
 
@@ -61,9 +96,9 @@ class SessionsTab(QWidget):
         self.session_list.itemDoubleClicked.connect(self.open_selected_session)
 
         btn_layout = QHBoxLayout()
-        new_btn = QPushButton("➕ Nowa kampania")
+        new_btn = QPushButton("Nowa kampania")
         new_btn.clicked.connect(self.add_session)
-        delete_btn = QPushButton("🗑️ Usuń kampanię")
+        delete_btn = QPushButton("Usuń kampanię")
         delete_btn.clicked.connect(self.delete_session)
         btn_layout.addWidget(new_btn)
         btn_layout.addWidget(delete_btn)
@@ -74,7 +109,14 @@ class SessionsTab(QWidget):
         self.layout.addLayout(btn_layout)
 
     def _build_session_detail_ui(self):
-        """Ekran sesji z zakładkami"""
+        """Render the Workspace view for the active campaign.
+
+        Clears the dashboard layout and builds the tabbed interface containing:
+        - Navigation button (Back to list).
+        - Notes tab (loaded from `narrion.tabs.notes`).
+        - Players tab (loaded from `tabs.characters`).
+        - NPCs tab (loaded from `tabs.characters`).
+        """
         self._clear_layout()
 
         back_btn = QPushButton("⬅ Wróć do listy kampanii")
@@ -93,6 +135,10 @@ class SessionsTab(QWidget):
         self.layout.addWidget(tabs)
 
     def add_session(self):
+        """Open a dialog to create a new campaign folder.
+
+        If the name is valid and unique, creates the directory and updates the UI.
+        """
         name, ok = QInputDialog.getText(self, "Nowa kampania", "Podaj nazwę kampanii:")
         if ok and name.strip():
             name = name.strip()
@@ -105,6 +151,11 @@ class SessionsTab(QWidget):
                 QMessageBox.warning(self, "Błąd", "Kampania o tej nazwie już istnieje.")
 
     def delete_session(self):
+        """Delete the selected campaign and its data from the filesystem.
+
+        Requires user confirmation via a QMessageBox. Uses `shutil.rmtree`
+        to remove the campaign directory.
+        """
         item = self.session_list.currentItem()
         if not item:
             QMessageBox.information(self, "Info", "Nie wybrano żadnej kampanii.")
@@ -126,15 +177,28 @@ class SessionsTab(QWidget):
             self._build_session_list_ui()
 
     def open_selected_session(self, item):
+        """Transition from List View to Detail View for the clicked item.
+
+        Args:
+            item (QListWidgetItem): The session item clicked in the list.
+        """
         name = item.text()
         self.current_session = name
         self._build_session_detail_ui()
 
     def _clear_layout(self):
-        """Czyści cały layout (używane przy przełączaniu widoków)"""
+        """Remove all widgets from the main layout.
+
+        This acts as a 'screen wipe' to allow rebuilding the UI for a different view.
+        """
         self._clear_layout_recursive(self.layout)
 
     def _clear_layout_recursive(self, layout):
+        """Recursively delete all widgets and sub-layouts from a given layout.
+
+        Args:
+            layout (QLayout): The layout to clean.
+        """
         if layout is None:
             return
         while layout.count():
@@ -146,5 +210,10 @@ class SessionsTab(QWidget):
                 self._clear_layout_recursive(item.layout())
 
 
-def build():
+def build() -> QWidget:
+    """Factory function to create the SessionsTab widget.
+
+    Returns:
+        SessionsTab: The main session management widget.
+    """
     return SessionsTab()

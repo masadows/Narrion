@@ -1,3 +1,17 @@
+"""Modular Content Blocks for Note Editor.
+
+This module defines the specific content blocks used in the application's
+block-based editor. Each block type inherits from a common `BaseBlock`
+and implements specific logic for user interaction and data serialization.
+
+The available blocks are:
+- **Text**: Rich text editing with formatting toolbar.
+- **Image**: Image embedding via Base64.
+- **Checklist**: Interactive to-do lists.
+- **Table**: Dynamic grid for structured data.
+- **Timeline**: Chronological event visualization.
+"""
+
 import base64
 import os
 from typing import Any, Dict
@@ -44,8 +58,26 @@ from widgets.color_wrapper import color
 
 @color
 class BaseBlock(QWidget):
-    '''Base class for all note blocks.'''
+    """Abstract base class for all note blocks.
+
+    Provides the common interface and UI elements shared by all block types,
+    including the control header (move up/down, delete) and the serialization methods.
+
+    Attributes:
+        parent_editor (QWidget): Reference to the parent editor widget managing this block.
+        delete_callback (callable): Function to call when the delete button is clicked.
+        layout (QVBoxLayout): Main layout of the block.
+        header_layout (QHBoxLayout): Layout for control buttons (hidden until hovered/active).
+        content_widget (QWidget): Container for the specific block implementation.
+    """
+
     def __init__(self, parent_editor, delete_callback):
+        """Initialize the base block structure.
+
+        Args:
+            parent_editor: The parent widget managing the list of blocks.
+            delete_callback: The function to execute to remove this block.
+        """
         super().__init__()
         self.parent_editor = parent_editor
         self.delete_callback = delete_callback
@@ -88,25 +120,39 @@ class BaseBlock(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
 
     def paintEvent(self, event):
-        '''Custom paint event to ensure proper styling.'''
+        """Custom paint event to ensure proper styling from QSS."""
         opt = QStyleOption()
         opt.initFrom(self)
         p = QPainter(self)
         self.style().drawPrimitive(QStyle.PE_Widget, opt, p, self)
 
     def get_data(self) -> Dict[str, Any]:
+        """Serialize the block's content.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the block type and its data.
+        """
         return {}
 
     def load_data(self, data: Dict[str, Any]):
+        """Load data into the block.
+
+        Args:
+            data (Dict[str, Any]): The data dictionary to populate the block with.
+        """
         pass
 
     def signal_change(self):
-        '''Notify parent editor of changes for auto-saving.'''
+        """Notify the parent editor that content has changed to trigger auto-save."""
         if self.parent_editor:
             self.parent_editor.schedule_auto_save()
 
     def changeFontColor(self, icon_color):
-        '''Update icon colors based on theme.'''
+        """Update icon colors dynamically based on the application theme.
+
+        Args:
+            icon_color (str): The new color hex code.
+        """
         if isValid(self.btn_up):
             self.btn_up.setIcon(qta.icon("fa5s.arrow-up", color=icon_color))
         if isValid(self.btn_down):
@@ -117,7 +163,12 @@ class BaseBlock(QWidget):
 
 @color
 class TextBlock(BaseBlock):
-    '''Rich text block with formatting options.'''
+    """Rich text editor block.
+
+    Features a local toolbar for formatting (bold, italic, lists, headers)
+    and uses a QTextEdit for input. Content is saved as HTML.
+    """
+
     def __init__(self, parent_editor, delete_callback):
         super().__init__(parent_editor, delete_callback)
 
@@ -198,7 +249,7 @@ class TextBlock(BaseBlock):
         self.content_layout.addWidget(self.editor)
 
     def create_format_button(self, icon_name, tooltip, slot):
-        '''Helper to create a formatting button.'''
+        """Helper to create a standard formatting button for the toolbar."""
         btn = QToolButton()
         btn.setIcon(qta.icon(icon_name, color=DEFAULT_FONT["icon_color"]))
         btn.setIconSize(QSize(14, 14))
@@ -210,7 +261,7 @@ class TextBlock(BaseBlock):
         return btn
 
     def toggle_bold(self):
-        '''Toggle bold formatting.'''
+        """Toggle bold formatting on the current selection."""
         is_checked = self.btn_bold.isChecked()
         fmt = self.editor.currentCharFormat()
         fmt.setFontWeight(QFont.Bold if is_checked else QFont.Normal)
@@ -218,7 +269,7 @@ class TextBlock(BaseBlock):
         self.editor.setFocus()
 
     def toggle_italic(self):
-        '''Toggle italic formatting.'''
+        """Toggle italic formatting on the current selection."""
         is_checked = self.btn_italic.isChecked()
         fmt = self.editor.currentCharFormat()
         fmt.setFontItalic(is_checked)
@@ -226,7 +277,7 @@ class TextBlock(BaseBlock):
         self.editor.setFocus()
 
     def toggle_underline(self):
-        '''Toggle underline formatting.'''
+        """Toggle underline formatting on the current selection."""
         is_checked = self.btn_underline.isChecked()
         fmt = self.editor.currentCharFormat()
         fmt.setFontUnderline(is_checked)
@@ -234,7 +285,7 @@ class TextBlock(BaseBlock):
         self.editor.setFocus()
 
     def toggle_list(self, list_style):
-        '''Toggle list formatting.'''
+        """Apply or remove list formatting (bullet or numbered)."""
         cursor = self.editor.textCursor()
         cursor.beginEditBlock()
 
@@ -256,12 +307,12 @@ class TextBlock(BaseBlock):
         self.editor.setFocus()
 
     def set_align(self, alignment):
-        '''Set text alignment.'''
+        """Apply text alignment to the current paragraph."""
         self.editor.setAlignment(alignment)
         self.editor.setFocus()
 
     def change_style(self):
-        '''Change text style based on combo box selection.'''
+        """Apply a preset style (Header 1-3, Normal) from the combo box."""
         idx = self.combo_style.currentIndex()
         self.editor.blockSignals(True)
 
@@ -285,7 +336,7 @@ class TextBlock(BaseBlock):
         self.update_toolbar_state()
 
     def update_toolbar_state(self):
-        '''Update toolbar button states based on current text format.'''
+        """Sync toolbar buttons with the formatting at the current cursor position."""
         self.btn_bold.blockSignals(True)
         self.btn_italic.blockSignals(True)
         self.btn_underline.blockSignals(True)
@@ -335,15 +386,15 @@ class TextBlock(BaseBlock):
         self.align_group.blockSignals(False)
 
     def get_data(self):
-        '''Get the rich text content as HTML.'''
+        """Get the rich text content as HTML."""
         return {"type": "text", "html": self.editor.toHtml()}
 
     def load_data(self, data):
-        '''Load rich text content from HTML.'''
+        """Load rich text content from HTML."""
         self.editor.setHtml(data.get("html", ""))
 
     def changeFontColor(self, icon_color):
-        '''Update icon colors based on theme.'''
+        """Update toolbar icons on theme change."""
         super().changeFontColor(icon_color)
         buttons = [
             self.btn_bold,
@@ -363,7 +414,12 @@ class TextBlock(BaseBlock):
 
 @color
 class ImageBlock(BaseBlock):
-    '''Image block allowing image upload and display.'''
+    """Image display block.
+
+    Allows the user to select an image file, which is then converted to a Base64
+    string and stored directly in the note data.
+    """
+
     def __init__(self, parent_editor, delete_callback):
         super().__init__(parent_editor, delete_callback)
 
@@ -378,7 +434,7 @@ class ImageBlock(BaseBlock):
         self.current_base64 = None
 
     def load_image_from_file(self):
-        '''Load an image from file and convert to base64.'''
+        """Open a file dialog to select and load an image."""
         path, _ = QFileDialog.getOpenFileName(
             self, "Wybierz obraz", "", "Images (*.png *.jpg *.jpeg *.bmp)"
         )
@@ -389,7 +445,7 @@ class ImageBlock(BaseBlock):
             self.signal_change()
 
     def display_image(self):
-        '''Display the image from base64 data.'''
+        """Render the image from the stored Base64 string."""
         if self.current_base64:
             pixmap = QPixmap()
             pixmap.loadFromData(base64.b64decode(self.current_base64))
@@ -408,7 +464,12 @@ class ImageBlock(BaseBlock):
 
 
 class ChecklistBlock(BaseBlock):
-    '''Checklist block with add/remove item functionality.'''
+    """Interactive checklist block.
+
+    Manages a list of items, each containing a checkbox and a text field.
+    Items can be added or removed dynamically.
+    """
+
     def __init__(self, parent_editor, delete_callback):
         super().__init__(parent_editor, delete_callback)
 
@@ -422,7 +483,7 @@ class ChecklistBlock(BaseBlock):
         self.content_layout.addWidget(self.btn_add)
 
     def add_item(self, text="", checked=False):
-        '''Add a new checklist item.'''
+        """Add a new row to the checklist."""
         row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
 
@@ -450,7 +511,7 @@ class ChecklistBlock(BaseBlock):
         self.signal_change()
 
     def remove_item(self, layout_item):
-        '''Remove a checklist item.'''
+        """Remove a specific item row from the checklist."""
         for i in range(self.items_layout.count()):
             item = self.items_layout.itemAt(i)
             widget = item.widget()
@@ -460,7 +521,7 @@ class ChecklistBlock(BaseBlock):
                 break
 
     def get_data(self):
-        '''Get checklist data.'''
+        """Serialize checklist state."""
         items = []
         for i in range(self.items_layout.count()):
             widget = self.items_layout.itemAt(i).widget()
@@ -472,12 +533,12 @@ class ChecklistBlock(BaseBlock):
         return {"type": "checklist", "items": items}
 
     def load_data(self, data):
-        '''Load checklist data.'''
+        """Populate checklist from saved data."""
         for item in data.get("items", []):
             self.add_item(item.get("text", ""), item.get("checked", False))
 
     def changeFontColor(self, icon_color):
-        '''Update delete button icon colors based on theme.'''
+        """Update delete button icons in list items."""
         super().changeFontColor(icon_color)
         if isValid(self):
             for i in range(self.items_layout.count()):
@@ -492,7 +553,12 @@ class ChecklistBlock(BaseBlock):
 
 @color
 class TableBlock(BaseBlock):
-    '''Table block with dynamic row/column addition.'''
+    """Grid-based data table block.
+
+    Wrapper around QTableWidget allowing dynamic addition of rows and columns,
+    and editing of column headers.
+    """
+
     def __init__(self, parent_editor, delete_callback):
         super().__init__(parent_editor, delete_callback)
 
@@ -529,7 +595,7 @@ class TableBlock(BaseBlock):
         self.adjust_table_height()
 
     def change_header_title(self, index):
-        '''Change the title of a table column header.'''
+        """Open dialog to rename a column header."""
         old_name = self.table.horizontalHeaderItem(index).text()
         new_name, ok = QInputDialog.getText(
             self, "Edytuj nagłówek", "Nazwa kolumny:", text=old_name
@@ -540,7 +606,7 @@ class TableBlock(BaseBlock):
             self.signal_change()
 
     def adjust_table_height(self):
-        '''Adjust the table height based on the number of rows.'''
+        """Auto-adjust widget height to fit content without scrollbars."""
         header_height = self.table.horizontalHeader().height()
         row_height = self.table.rowHeight(0) if self.table.rowCount() > 0 else 30
         total_height = header_height + (self.table.rowCount() * row_height) + 4
@@ -549,19 +615,19 @@ class TableBlock(BaseBlock):
         self.table.setMaximumHeight(max(70, total_height))
 
     def add_row(self):
-        '''Add a new row to the table.'''
+        """Append a new row to the table."""
         self.table.insertRow(self.table.rowCount())
         self.signal_change()
 
     def add_col(self):
-        '''Add a new column to the table.'''
+        """Append a new column to the table."""
         col_count = self.table.columnCount()
         self.table.insertColumn(col_count)
         self.table.setHorizontalHeaderItem(col_count, QTableWidgetItem(f"Kolumna {col_count + 1}"))
         self.signal_change()
 
     def get_data(self):
-        '''Get table data.'''
+        """Serialize table structure and content."""
         rows = self.table.rowCount()
         cols = self.table.columnCount()
 
@@ -590,7 +656,7 @@ class TableBlock(BaseBlock):
         }
 
     def load_data(self, data):
-        '''Load table data.'''
+        """Reconstruct table from saved data."""
         self.table.blockSignals(True)
         rows = data.get("rows", 2)
         cols = data.get("cols", 2)
@@ -618,7 +684,12 @@ class TableBlock(BaseBlock):
 
 
 class TimelineWidget(QWidget):
-    '''Custom widget to visualize a timeline of events.'''
+    """Custom painted widget to visualize events on a chronological line.
+
+    Draws a horizontal line with events placed alternately above and below.
+    Uses `paintEvent` for custom rendering.
+    """
+
     def __init__(self):
         super().__init__()
         self.setMinimumHeight(220)
@@ -626,14 +697,18 @@ class TimelineWidget(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
 
     def set_events(self, events):
-        '''Set the list of events to display on the timeline.'''
+        """Update the list of events and trigger a repaint.
+
+        Args:
+            events (list): List of tuples/lists containing (date, title).
+        """
         self.events = events
         min_width = max(600, len(events) * 160 + 100)
         self.setMinimumWidth(min_width)
         self.update()
 
     def paintEvent(self, event):
-        '''Custom paint event to draw the timeline and events.'''
+        """Draw the timeline spine and event nodes."""
         painter = QPainter()
         if not painter.begin(self):
             return
@@ -737,7 +812,12 @@ class TimelineWidget(QWidget):
 
 @color
 class TimelineBlock(BaseBlock):
-    '''Timeline block allowing event addition and visualization.'''
+    """Timeline editor block.
+
+    Combines an input list (for adding dates/titles) with the visual
+    `TimelineWidget` to display changes in real-time.
+    """
+
     def __init__(self, parent_editor, delete_callback):
         super().__init__(parent_editor, delete_callback)
 
@@ -779,7 +859,7 @@ class TimelineBlock(BaseBlock):
         self.container_layout.addWidget(self.viz_scroll)
 
     def add_event_input(self, date="", title=""):
-        '''Add a new event input row.'''
+        """Create a new input row for a timeline event."""
         row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
 
@@ -828,7 +908,7 @@ class TimelineBlock(BaseBlock):
         QTimer.singleShot(10, lambda: self.refresh_visualization())
 
     def move_event(self, widget, direction):
-        '''Move an event up or down in the list.'''
+        """Reorder an event in the list."""
         idx = self.events_layout.indexOf(widget)
         new_idx = idx + direction
 
@@ -838,12 +918,12 @@ class TimelineBlock(BaseBlock):
             self.refresh_visualization()
 
     def remove_event(self, widget):
-        '''Remove an event input row.'''
+        """Delete an event input row."""
         widget.deleteLater()
         QTimer.singleShot(50, self.refresh_visualization)
 
     def refresh_visualization(self):
-        '''Refresh the timeline visualization based on current events.'''
+        """Parse inputs and update the visual timeline widget."""
         events = []
         for i in range(self.events_layout.count()):
             w = self.events_layout.itemAt(i).widget()
@@ -857,7 +937,7 @@ class TimelineBlock(BaseBlock):
         self.signal_change()
 
     def get_data(self):
-        '''Get timeline data.'''
+        """Serialize timeline events."""
         events = []
         for i in range(self.events_layout.count()):
             w = self.events_layout.itemAt(i).widget()
@@ -872,12 +952,12 @@ class TimelineBlock(BaseBlock):
         return {"type": "timeline", "events": events}
 
     def load_data(self, data):
-        '''Load timeline data.'''
+        """Load timeline data from storage."""
         for ev in data.get("events", []):
             self.add_event_input(ev.get("date", ""), ev.get("title", ""))
 
     def changeFontColor(self, icon_color):
-        '''Update icon colors based on theme.'''
+        """Update input control icons on theme change."""
         super().changeFontColor(icon_color)
         if isValid(self):
             for btn in self.icon_buttons:
