@@ -9,9 +9,9 @@ semantic search engine, allowing users to:
 - Manage a list of favorite maps.
 """
 
+import json
 import os
 import pickle
-import json
 
 import numpy as np
 from PySide6.QtCore import Qt, QUrl
@@ -308,18 +308,18 @@ class BattlemapsWidget(QWidget):
         else:
             self.map_list.clear()
 
-    def scan_folder(self, first_open = False):
+    def scan_folder(self, first_open=False):
         """Open a directory dialog and scan for images to index."""
         if not self.ensure_model_loaded():
             return
-        
+
         if first_open:
             folder = self.settings.get("image_path")
         else:
             folder = QFileDialog.getExistingDirectory(self, "Wybierz folder z mapami")
         if not folder:
             return
-        
+
         self.settings["image_path"] = folder
         self.save_settings()
 

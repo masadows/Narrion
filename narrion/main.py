@@ -11,8 +11,8 @@ Usage:
 
 import sys
 
+from PySide6.QtCore import QLibraryInfo, QTranslator
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTranslator, QLibraryInfo
 
 from main_window import MainWindow
 

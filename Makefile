@@ -17,7 +17,7 @@ requirements:
 	uv pip install -r requirements.txt
 requirements-dev:
 	uv pip install -r requirements.txt
-	uv pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-autoapi[python]
+	uv pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-autoapi[python] pytest pytest-mock
 
 
 

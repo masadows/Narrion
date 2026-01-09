@@ -3,7 +3,10 @@
 This module defines the entry point for the graphical user interface.
 """
 
+import json
 import os
+from pathlib import Path
+import shutil
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
@@ -32,9 +35,6 @@ from tabs.initiative import build as build_initiative
 from tabs.sessions import build as build_sessions
 from themes import DEFAULT_FONT, THEMES
 from widgets.color_wrapper import COLOR_LISTENERS
-import json
-import shutil
-from pathlib import Path
 
 
 class MainWindow(QMainWindow):
@@ -188,7 +188,7 @@ class MainWindow(QMainWindow):
 
                 for cls in COLOR_LISTENERS:
                     cls.changeFontColor(icon_color)
-                self.settings['theme'] = theme_name
+                self.settings["theme"] = theme_name
                 self.save_settings()
             except FileNotFoundError:
                 print(f"Nie znaleziono pliku motywu: {path}")
