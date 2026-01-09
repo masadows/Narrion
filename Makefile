@@ -12,10 +12,12 @@ PYTHON_INTERPRETER = python
 
 
 ## Install Python dependencies
-.PHONY: requirements
+.PHONY: requirements requirements-dev
 requirements:
 	uv pip install -r requirements.txt
-	
+requirements-dev:
+	uv pip install -r requirements.txt
+	uv pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-autoapi[python]
 
 
 
@@ -64,6 +66,13 @@ run:
 .PHONY: browser
 browser:
 	uv run qta-browser
+
+
+.PHONY: docs docs-serve
+docs:
+	uv run mkdocs build 
+docs-serve:
+	uv run mkdocs serve
 
 #################################################################################
 # PROJECT RULES                                                                 #

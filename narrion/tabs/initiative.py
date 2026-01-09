@@ -15,10 +15,10 @@ The module consists of several components:
 
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import QAbstractItemModel, QModelIndex, QSize, Qt
+from PySide6.QtGui import QIcon, QResizeEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -33,6 +33,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QSpinBox,
     QStyledItemDelegate,
+    QStyleOptionViewItem,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -62,15 +63,15 @@ class CharacterSelectionDialog(QDialog):
         character_list (QListWidget): List of available characters
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         """Initialize the character selection dialog.
 
         Args:
             parent: Parent widget, defaults to None
         """
         super().__init__(parent)
-        self.campaign_path = None
-        self.manual_character_data = None  # Store manually created character data
+        self.campaign_path: Optional[Path] = None
+        self.manual_character_data: Optional[dict] = None
 
         self.setWindowTitle("Wybierz postać")
         self.setModal(True)
@@ -233,7 +234,7 @@ class CharacterSelectionDialog(QDialog):
                 }
                 self.accept()
 
-    def get_selected_character_data(self) -> tuple[str, str]:
+    def get_selected_character_data(self) -> Optional[tuple[str, str]]:
         """Get the selected character's name and type.
 
         Returns:
@@ -261,7 +262,7 @@ class InitiativeItemDelegate(QStyledItemDelegate):
         max_value (int): Maximum allowed initiative value
     """
 
-    def __init__(self, parent=None, min_value=1, max_value=30):
+    def __init__(self, parent: Optional[QWidget] = None, min_value: int = 1, max_value: int = 30):
         """Initialize the initiative item delegate.
 
         Args:
@@ -273,7 +274,9 @@ class InitiativeItemDelegate(QStyledItemDelegate):
         self.min_value = min_value
         self.max_value = max_value
 
-    def createEditor(self, parent, option, index) -> QSpinBox:
+    def createEditor(
+        self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> QSpinBox:
         """Create a QSpinBox editor for initiative values.
 
         Args:
@@ -289,7 +292,7 @@ class InitiativeItemDelegate(QStyledItemDelegate):
         editor.setAlignment(Qt.AlignCenter)
         return editor
 
-    def setEditorData(self, editor: QSpinBox, index):
+    def setEditorData(self, editor: QSpinBox, index: QModelIndex):
         """Sets the data to be displayed and edited by the editor from the data model item specified by the model index.
 
         Args:
@@ -299,7 +302,7 @@ class InitiativeItemDelegate(QStyledItemDelegate):
         value = int(index.model().data(index, Qt.EditRole))
         editor.setValue(value)
 
-    def setModelData(self, editor: QSpinBox, model, index):
+    def setModelData(self, editor: QSpinBox, model: QAbstractItemModel, index: QModelIndex):
         """Gets data from the editor widget and stores it in the specified model at the item index.
 
         Args:
@@ -309,7 +312,9 @@ class InitiativeItemDelegate(QStyledItemDelegate):
         """
         model.setData(index, editor.value(), Qt.EditRole)
 
-    def updateEditorGeometry(self, editor: QSpinBox, option, index):
+    def updateEditorGeometry(
+        self, editor: QSpinBox, option: QStyleOptionViewItem, index: QModelIndex
+    ):
         """Updates the editor for the item specified by index according to the style option given.
 
         Args:
@@ -330,7 +335,7 @@ class StatusItemDelegate(QStyledItemDelegate):
         statuses (List[str]): List of available status options
     """
 
-    def __init__(self, parent=None, statuses: List[str] = None):
+    def __init__(self, parent: Optional[QWidget] = None, statuses: List[str] = None):
         """Initialize the status item delegate.
 
         Args:
@@ -340,7 +345,9 @@ class StatusItemDelegate(QStyledItemDelegate):
         super().__init__(parent)
         self.statuses = statuses if statuses is not None else []
 
-    def createEditor(self, parent, option, index) -> QComboBox:
+    def createEditor(
+        self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> QComboBox:
         """Create a QComboBox editor for status values.
 
         Args:
@@ -355,7 +362,7 @@ class StatusItemDelegate(QStyledItemDelegate):
         editor.addItems(self.statuses)
         return editor
 
-    def setEditorData(self, editor: QComboBox, index):
+    def setEditorData(self, editor: QComboBox, index: QModelIndex):
         """Sets the data to be displayed and edited by the editor from the data model item specified by the model index.
 
         Args:
@@ -367,7 +374,7 @@ class StatusItemDelegate(QStyledItemDelegate):
         if idx >= 0:
             editor.setCurrentIndex(idx)
 
-    def setModelData(self, editor: QComboBox, model, index):
+    def setModelData(self, editor: QComboBox, model: QAbstractItemModel, index: QModelIndex):
         """Gets data from the editor widget and stores it in the specified model at the item index.
 
         Args:
@@ -377,7 +384,9 @@ class StatusItemDelegate(QStyledItemDelegate):
         """
         model.setData(index, editor.currentText(), Qt.EditRole)
 
-    def updateEditorGeometry(self, editor: QComboBox, option, index):
+    def updateEditorGeometry(
+        self, editor: QComboBox, option: QStyleOptionViewItem, index: QModelIndex
+    ):
         """Updates the editor for the item specified by index according to the style option given.
 
         Args:
@@ -541,11 +550,11 @@ class InitiativeTracker(QWidget):
                 return
 
             # Handle regular character selection
-            char_name, char_type = dialog.get_selected_character_data()
-
-            if not char_name or not char_type:
+            result = dialog.get_selected_character_data()
+            if not result:
                 QMessageBox.warning(self, "Błąd", "Nie udało się załadować danych postaci.")
                 return
+            char_name, char_type = result
 
             char_table_name = f"{char_name} ({char_type})"
 
@@ -738,14 +747,14 @@ class InitiativeTracker(QWidget):
         for name, initiative, status in characters:
             self.add_character_data(name, initiative, status)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent):
         """Handle widget resize events for responsive UI.
 
         Switches between text and icon-only button layouts based
         on available width to maintain usability on smaller screens.
 
         Args:
-            event: The resize event
+            event (QResizeEvent): The resize event
         """
         super().resizeEvent(event)
         if self.table.width() < self.BUTTONS_RESIZE_THRESHOLD:
@@ -766,14 +775,14 @@ class InitiativeTracker(QWidget):
             self.sort_btn.setIcon(QIcon())
             self.sort_btn.setText("Sortuj według inicjatywy")
 
-    def changeFontColor(self, icon_color):
+    def changeFontColor(self, icon_color: str):
         """Update button icon colors when theme changes.
 
         Updates the icon colors for all buttons when in icon-only mode
         to match the current theme.
 
         Args:
-            icon_color: The new icon color to apply
+            icon_color (str): The new icon color to apply
         """
         if self.table.width() < self.BUTTONS_RESIZE_THRESHOLD:
             for btn in [self.next_btn, self.add_btn, self.remove_btn, self.sort_btn]:
