@@ -70,7 +70,7 @@ browser:
 
 .PHONY: docs docs-serve
 docs:
-	uv run mkdocs build 
+	uv run mkdocs build
 docs-serve:
 	uv run mkdocs serve
 
