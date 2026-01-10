@@ -5,6 +5,7 @@ theme: readthedocs
 nav:
   # - Home: index.md
   - Instrukcja użytkownika: instruction.md
+  - Analiza modeli: models.md
 
 plugins:
   - search
