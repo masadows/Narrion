@@ -25,7 +25,7 @@ make requirements
 3. (Opcionalnie) Konfiguracja kalendarza
 
     1. Stworz własny token dostępu do Google API:
-    [Google API docs]()
+    [Google API docs](https://developers.google.com/workspace/calendar/api/quickstart/python?hl=pl#configure_the_oauth_consent_screen)
     2. Skopiuj uzyskany plik `credentials.json` do katalogu `Narrion/data`
 
 3. Uruchomienie aplikacji
