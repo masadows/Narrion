@@ -2,6 +2,10 @@ site_name: Narrion
 
 theme: readthedocs
 
+nav:
+  # - Home: index.md
+  - Instrukcja użytkownika: instruction.md
+
 plugins:
   - search
   - mkdocstrings:
