@@ -1,5 +1,4 @@
 pip
-pytest
 python-dotenv
 ruff
 pyside6

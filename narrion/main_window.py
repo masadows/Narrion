@@ -1,4 +1,13 @@
+"""Main Application Window and Navigation Controller.
+
+This module defines the entry point for the graphical user interface.
+"""
+
+import json
 import os
+from pathlib import Path
+import shutil
+
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -8,6 +17,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QSizePolicy,
     QStackedWidget,
@@ -15,7 +25,6 @@ from PySide6.QtWidgets import (
     QToolBar,
     QVBoxLayout,
     QWidget,
-    QMessageBox
 )
 import qtawesome as qta
 
@@ -29,8 +38,28 @@ from widgets.color_wrapper import COLOR_LISTENERS
 
 
 class MainWindow(QMainWindow):
+    """The root window of the RPG Master Assistant application.
+
+    This class serves as the central hub for the application. It implements
+    a responsive layout that adapts the sidebar based on window width and
+    manages the state of active themes.
+
+
+
+    Attributes:
+        central (QWidget): The central container widget.
+        side_panel (QWidget): The collapsible navigation sidebar.
+        stack (QStackedWidget): The container for main pages (Sessions, Battlemaps, etc.).
+        page_buttons (list[QPushButton]): References to navigation buttons for state updates.
+        current_theme (str): The name of the currently active QSS theme.
+        initiative_dock (QDockWidget | None): Handle for the Initiative Tracker dock.
+        dice_dock (QDockWidget | None): Handle for the Dice Roller dock.
+    """
+
     def __init__(self):
+        """Initialize the main window, UI components, and theme engine."""
         super().__init__()
+        self.load_settings()
         self.setWindowTitle("RPG Master Assistant")
         self.setWindowIcon(QIcon.fromTheme("applications-games"))
 
@@ -72,7 +101,6 @@ class MainWindow(QMainWindow):
         self.pages = [
             build_sessions(),
             build_battlemaps(),
-            # build_calendar(),
             QWidget(),
         ]
         for page in self.pages:
@@ -84,7 +112,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status)
         self.status.showMessage("Gotowe — UI mockup")
 
-        self.current_theme = DEFAULT_FONT["name"]
+        self.current_theme = self.settings.get("theme")
         self.apply_theme(self.current_theme)
 
         self.dark_switch = QCheckBox()
@@ -99,7 +127,25 @@ class MainWindow(QMainWindow):
 
         self.switch_page(0)
 
+    def load_settings(self):
+        settings_path = Path("./data/settings.json")
+        basic_path = Path("./data/default_settings.json")
+        if not settings_path.exists():
+            shutil.copy(basic_path, settings_path)
+
+        with open(settings_path, "r") as file:
+            self.settings = json.load(file)
+
+    def save_settings(self):
+        with open("./data/settings.json", "w") as file:
+            json.dump(self.settings, file, indent=4)
+
     def _create_toolbar(self) -> QToolBar:
+        """Construct the top toolbar with theme controls.
+
+        Returns:
+            QToolBar: The configured toolbar widget.
+        """
         tb = QToolBar("Główne")
         tb.setIconSize(QSize(20, 20))
 
@@ -120,6 +166,11 @@ class MainWindow(QMainWindow):
         return tb
 
     def apply_theme(self, theme_name: str):
+        """Apply a new visual theme to the application.
+
+        Args:
+            theme_name (str): The key name of the theme in `THEMES`.
+        """
         theme_info = THEMES.get(theme_name)
         if theme_info:
             try:
@@ -137,12 +188,21 @@ class MainWindow(QMainWindow):
 
                 for cls in COLOR_LISTENERS:
                     cls.changeFontColor(icon_color)
+                self.settings["theme"] = theme_name
+                self.save_settings()
             except FileNotFoundError:
                 print(f"Nie znaleziono pliku motywu: {path}")
         else:
             print(f"Nieznany motyw: {theme_name}")
 
     def toggle_light_dark(self, state):
+        """Switch between Light and Dark variants of the current theme.
+
+        Assumes theme naming convention like "Name Light" and "Name Dark".
+
+        Args:
+            state (int): Checkbox state (unused, logic relies on current name).
+        """
         if not self.current_theme:
             return
 
@@ -159,7 +219,17 @@ class MainWindow(QMainWindow):
         if new_name in THEMES:
             self.theme_select.setCurrentText(new_name)
 
-    def switch_page(self, index):
+    def switch_page(self, index: int | str):
+        """Navigate to a specific page or toggle a dock widget.
+
+        Handles routing logic:
+        - **Int**: Switch the `QStackedWidget` to the given index.
+        - **"dice" / "tracker"**: Open/Show the corresponding `QDockWidget`.
+        - **Calendar (index 2)**: Checks for credentials before lazy loading.
+
+        Args:
+            index (int | str): The target destination identifier.
+        """
         for btn in self.page_buttons:
             btn.setChecked(False)
 
@@ -188,7 +258,7 @@ class MainWindow(QMainWindow):
             self.page_buttons[index].setChecked(True)
 
     def _show_calendar_credentials_missing(self):
-        '''Show information about missing credentials'''
+        """Display an alert dialog if Google Calendar credentials are missing."""
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Warning)
         msg.setWindowTitle("Brak konfiguracji kalendarza")
@@ -201,6 +271,13 @@ class MainWindow(QMainWindow):
         msg.exec()
 
     def resizeEvent(self, event):
+        """Handle window resize to provide responsive UI.
+
+        Collapses the sidebar to icons-only mode when width < 900px.
+
+        Args:
+            event (QResizeEvent): The resize event.
+        """
         super().resizeEvent(event)
         if self.central.width() < 900:
             for btn in self.page_buttons:
@@ -212,6 +289,7 @@ class MainWindow(QMainWindow):
             self.side_panel.setFixedWidth(160)
 
     def open_initiative_dock(self):
+        """Create or show the Initiative Tracker dock widget."""
         if self.initiative_dock is None:
             self.initiative_dock = QDockWidget("Tracker inicjatywy", self)
             self.initiative_dock.setWidget(build_initiative())
@@ -225,6 +303,7 @@ class MainWindow(QMainWindow):
         self.initiative_dock.show()
 
     def open_dice_dock(self):
+        """Create or show the Dice Roller dock widget."""
         if self.dice_dock is None:
             self.dice_dock = QDockWidget("Rzut kośćmi", self)
             self.dice_dock.setWidget(build_dice())

@@ -1,0 +1,12 @@
+site_name: Narrion
+
+theme: readthedocs
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+  - mkdocs-autoapi:
+      autoapi_dir: narrion
+      autoapi_file_patterns:
+        - "*.py"
