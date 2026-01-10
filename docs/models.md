@@ -3,8 +3,11 @@ Nasza aplikacja pozwala na wyszukiwanie map po ich opisie w języku naturalnym.
 Jest to możliwe dzięki wykorzystaniu modeli uczenia maszynowego, które potrafią przekształcić zarówno obrazy, jak i teksty na wektory we wspólnej przestrzeni wielowymiarowej.
 
 ## Analizowane modele
+
 W ramach projektu wyselekcjonowaliśmy modele, poddając je ocenie pod kątem ich przydatności do naszego zastosowania oraz możliwości sprzętowych.
+
 Poniżej znajduje się lista rozważanych modeli wraz z krótkimi opisami:
+
 - **EmbeddingGemma**
     - [model](https://huggingface.co/headwAI/embeddinggemma-300m)
     - [artykuł](https://arxiv.org/pdf/2509.20354)
@@ -35,38 +38,55 @@ Poniżej znajduje się lista rozważanych modeli wraz z krótkimi opisami:
     - Model łączący koder tekstu i obrazów, umożliwiający efektywne wyszukiwanie obrazów na podstawie opisów tekstowych. CLIP jest szeroko stosowany w zadaniach związanych z multimodalnym uczeniem maszynowym. Został on wytrenowany poprzez kontrastowe uczenie na ogromnym zbiorze danych składającym się z par obraz-tekst, co oznacza, że reprezentacje obrazów i odpowiadające im opisy tekstowe są mapowane na podobne wektory w przestrzeni.
 
 ## Zbiór danych
+
 Do trenowania i oceny modeli wykorzystaliśmy zbiór danych składający się z obrazów battlemap wraz z odpowiadającymi im krótkimi oraz długimi opisami tekstowymi.
+
 Zbiór danych został zebrany z różnych źródeł internetowych oraz uzupełniony o syntetycznie wygenerowane opisy przy pomocy zewnętrznego modelu generującego tekst na podstawie obrazów - [Qwen2-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2-VL-7B-Instruct).
+
+**Źródła danych:**
+
 - [Zbiór map (1.57k) z krótkimi opisami](https://huggingface.co/datasets/nishanthc/dnd_map_dataset_v0.1)
-- [Zbiór map (202) z długimi opisami](https://huggingface.co/datasets/Angry-Wizard/rpg_grid_maps)
+- [Zbiór map (202) z długimi opisami](https://huggingface.co/datasets/Angry-Wizard/rpg_grid_maps)  
 - [Zbiór map z nazwami plików jako opisami](https://drive.google.com/drive/folders/1QiBxKfHjNdYvmuw6mMfigqunJZrn50QH)
 
-W ten sposób powstał zbiór danych zawierający 4957 obrazów wraz z odpowiadającymi im krótkimi oraz długimi opisami tekstowymi.
-Został on podzielony na zbiór treningowy (80%), walidacyjny (10%) oraz testowy (10%).
+W ten sposób powstał zbiór danych zawierający **4957 obrazów** wraz z odpowiadającymi im krótkimi oraz długimi opisami tekstowymi.
+
+**Podział danych:**
+
+- Zbiór treningowy: 80%
+- Zbiór walidacyjny: 10% 
+- Zbiór testowy: 10%
+
 Notebook z przygotowaniem zbioru danych znajduje się w folderze `notebooks` pod nazwą `Dataset_processing.ipynb`.
 
 ## Testowanie modeli
 Różne konfiguracje modeli zostały dotrenowane na przygotowanym zbiorze danych (wymiennie stosując krótkie lub długie opisy), a następnie przetestowane. Notebooki z eksperymentami znajdują się w folderze `notebooks`.
-- CLIP - [notebook](notebooks/CLIP_experiments.ipynb)
-- EmbeddingGemma-MobileViT - [notebook](notebooks/EmbeddingGemma_MobileViT_experiments.ipynb)
-- TinyBERT-EfficientNet - [notebook](notebooks/TinyBERT_EfficientNet_experiments.ipynb)
-- distilBERT-ResNet50 - [notebook](notebooks/distilBERT_ResNet50_experiments.ipynb)
+
+- **CLIP** - `CLIP_experiments.ipynb`
+- **EmbeddingGemma-MobileViT** - `EmbeddingGemma_MobileViT_experiments.ipynb`
+- **TinyBERT-EfficientNet** - `TinyBERT_EfficientNet_experiments.ipynb`
+- **distilBERT-ResNet50** - `distilBERT_ResNet50_experiments.ipynb`
 
 ### Wyniki eksperymentów
+
 Poniżej przedstawiamy podsumowanie wyników uzyskanych przez poszczególne modele po trenowaniu na naszym zbiorze danych:
-| Model                      | Loss       | Image Retrieval Accuracy | Text Retrieval Accuracy |
-|----------------------------|------------|--------------------------|-------------------------|
-| bazowy CLIP                | 2.6953     | 33.01%                   | 40.82%                  |
-| **dotrenowany CLIP**       | **1.1513** | **68.16%**               | **68.55%**              |
-| EmbeddingGemma-MobileViT   | 1.5858     | 52.02%                   | 48.59%                  |
-| TinyBERT-EfficientNet      | 2.2046     | 28.83%                   | 27.82%                  |
-| distilBERT-ResNet50        | 2.687      | 25.8%                    | 20.8%                   |
+
+| Model                    | Loss    | Image Retrieval Accuracy | Text Retrieval Accuracy |
+|--------------------------|---------|--------------------------|-------------------------|
+| bazowy CLIP              | 2.6953  | 33.01%                   | 40.82%                  |
+| **dotrenowany CLIP**     | **1.1513** | **68.16%**            | **68.55%**              |
+| EmbeddingGemma-MobileViT | 1.5858  | 52.02%                   | 48.59%                  |
+| TinyBERT-EfficientNet    | 2.2046  | 28.83%                   | 27.82%                  |
+| distilBERT-ResNet50      | 2.687   | 25.8%                    | 20.8%                   |
 
 ## Wybór modelu do aplikacji
+
 Na podstawie przeprowadzonych eksperymentów wybraliśmy model CLIP jako najbardziej odpowiedni do naszego zastosowania.
-Model ten osiągnął najlepsze wyniki pod względem dokładności wyszukiwania obrazów na podstawie tekstu, co jest kluczowe dla funkcjonalności naszej aplikacji.
-Dodatkowo w naszym osobistym odczuciu wyniki zwracane przez model CLIP były najbardziej zgodne z oczekiwaniami użytkowników.
+
+Model ten osiągnął najlepsze wyniki pod względem dokładności wyszukiwania obrazów na podstawie tekstu, co jest kluczowe dla funkcjonalności naszej aplikacji. Dodatkowo w naszym osobistym odczuciu wyniki zwracane przez model CLIP były najbardziej zgodne z oczekiwaniami użytkowników.
 
 ## Integracja modelu z aplikacją
+
 Model CLIP został zintegrowany z aplikacją i jest wykorzystywany do wyszukiwania battlemap na podstawie opisów tekstowych.
+
 Integracja modelu z aplikacją została przeprowadzona w module `battlemaps`, gdzie zaimplementowano funkcje odpowiedzialne za przetwarzanie zapytań tekstowych oraz wyszukiwanie odpowiednich obrazów w bazie danych.
