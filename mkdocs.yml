@@ -3,7 +3,7 @@ site_name: Narrion
 theme: readthedocs
 
 nav:
-  # - Home: index.md
+  - Home: index.md
   - Instrukcja użytkownika: instruction.md
   - Analiza modeli: models.md
 
