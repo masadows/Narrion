@@ -1,9 +1,9 @@
-# Narrion Assystent mistrza gier RPG
+# Narrion - Asystent mistrza gier RPG
 
 Narzędzie wspierające Mistrzów Gry podczas sesji RPG. Aplikacja pomaga zarządzać informacjami o świecie gry, postaciach i wydarzeniach, a jednocześnie usprawnia organizację sesji i rozgrywkę - zarówno podczas przygotowań, jak i w trakcie samej sesji.
 
 ## Wymagania
-Przed uruchomienie aplikacji należy się upewnić, że posiadamy zainstalowane:
+Przed uruchomieniem aplikacji należy się upewnić, że posiadamy zainstalowane:
 
 - Python **3.12**
 - UV
