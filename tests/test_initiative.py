@@ -193,3 +193,143 @@ class TestCharacterSelectionDialog:
         assert result[0] == "Test Character"
         assert result[1] == "Player"
 
+
+class TestInitiativeItemDelegate:
+    """Test cases for InitiativeItemDelegate class."""
+
+    @pytest.fixture
+    def delegate(self, q_app):
+        """Create an InitiativeItemDelegate instance for testing."""
+        return InitiativeItemDelegate(min_value=1, max_value=30)
+
+    def test_init_default_values(self, q_app):
+        """Test delegate initialization with default values."""
+        delegate = InitiativeItemDelegate()
+        assert delegate.min_value == 1
+        assert delegate.max_value == 30
+
+    def test_init_custom_values(self, q_app):
+        """Test delegate initialization with custom values."""
+        delegate = InitiativeItemDelegate(min_value=5, max_value=50)
+        assert delegate.min_value == 5
+        assert delegate.max_value == 50
+
+    def test_create_editor(self, delegate, q_app):
+        """Test creating a QSpinBox editor."""
+        from PySide6.QtWidgets import QWidget
+        parent = QWidget()
+        option = MagicMock()
+        index = MagicMock()
+        
+        editor = delegate.createEditor(parent, option, index)
+        
+        assert isinstance(editor, QSpinBox)
+        assert editor.minimum() == 1
+        assert editor.maximum() == 30
+        assert editor.alignment() == Qt.AlignCenter
+
+    def test_set_editor_data(self, delegate, q_app):
+        """Test setting data in the editor."""
+        editor = QSpinBox()
+        mock_index = MagicMock()
+        mock_model = MagicMock()
+        mock_model.data.return_value = "15"
+        mock_index.model.return_value = mock_model
+        
+        delegate.setEditorData(editor, mock_index)
+        
+        assert editor.value() == 15
+
+    def test_set_model_data(self, delegate, q_app):
+        """Test setting model data from editor."""
+        editor = QSpinBox()
+        editor.setValue(20)
+        mock_model = MagicMock()
+        mock_index = MagicMock()
+        
+        delegate.setModelData(editor, mock_model, mock_index)
+        
+        mock_model.setData.assert_called_once_with(mock_index, 20, Qt.EditRole)
+
+    def test_update_editor_geometry(self, delegate, q_app):
+        """Test updating editor geometry."""
+        from PySide6.QtCore import QRect
+        editor = QSpinBox()
+        mock_option = MagicMock()
+        test_rect = QRect(10, 10, 100, 30)
+        mock_option.rect = test_rect
+        mock_index = MagicMock()
+        
+        delegate.updateEditorGeometry(editor, mock_option, mock_index)
+        
+        # Should call setGeometry with the option's rect
+        assert editor.geometry() == test_rect
+
+
+class TestStatusItemDelegate:
+    """Test cases for StatusItemDelegate class."""
+
+    @pytest.fixture
+    def delegate(self, q_app):
+        """Create a StatusItemDelegate instance for testing."""
+        return StatusItemDelegate(statuses=["Żywy", "Ogłuszony", "Martwy"])
+
+    def test_init_default_statuses(self, q_app):
+        """Test delegate initialization with default statuses."""
+        delegate = StatusItemDelegate()
+        assert delegate.statuses == []
+
+    def test_init_custom_statuses(self, delegate):
+        """Test delegate initialization with custom statuses."""
+        assert delegate.statuses == ["Żywy", "Ogłuszony", "Martwy"]
+
+    def test_create_editor(self, delegate, q_app):
+        """Test creating a QComboBox editor."""
+        
+        parent = QWidget()
+        option = MagicMock()
+        index = MagicMock()
+        
+        editor = delegate.createEditor(parent, option, index)
+        
+        assert isinstance(editor, QComboBox)
+        assert editor.count() == 3
+
+    def test_set_editor_data(self, delegate, q_app):
+        """Test setting data in the editor."""
+        editor = QComboBox()
+        editor.addItems(["Żywy", "Ogłuszony", "Martwy"])
+        mock_index = MagicMock()
+        mock_model = MagicMock()
+        mock_model.data.return_value = "Ogłuszony"
+        mock_index.model.return_value = mock_model
+        
+        delegate.setEditorData(editor, mock_index)
+        
+        assert editor.currentText() == "Ogłuszony"
+
+    def test_set_model_data(self, delegate, q_app):
+        """Test setting model data from editor."""
+        editor = QComboBox()
+        editor.addItems(["Żywy", "Ogłuszony", "Martwy"])
+        editor.setCurrentText("Martwy")
+        mock_model = MagicMock()
+        mock_index = MagicMock()
+        
+        delegate.setModelData(editor, mock_model, mock_index)
+        
+        mock_model.setData.assert_called_once_with(mock_index, "Martwy", Qt.EditRole)
+
+    def test_update_editor_geometry(self, delegate, q_app):
+        """Test updating editor geometry."""
+        from PySide6.QtCore import QRect
+        editor = QComboBox()
+        mock_option = MagicMock()
+        test_rect = QRect(20, 20, 150, 40)
+        mock_option.rect = test_rect
+        mock_index = MagicMock()
+        
+        delegate.updateEditorGeometry(editor, mock_option, mock_index)
+        
+        # Should call setGeometry with the option's rect
+        assert editor.geometry() == test_rect
